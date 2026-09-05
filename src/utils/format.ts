@@ -14,27 +14,25 @@ export function formatYang(value: bigint | number | string): string {
 
 export function parsePrice(value: string | number | undefined): bigint | null {
   if (value === undefined || value === null || value === '') return null
-  if (typeof value === 'number') return Number.isFinite(value) ? BigInt(Math.trunc(value)) : null
-
+  if (typeof value === 'number') return Number.isSafeInteger(value) && value >= 0 ? BigInt(value) : null
+  if (value.length > 100) return null
   const normalized = value.trim().toLowerCase().replace(/\s/g, '').replace(',', '.')
-  const match = normalized.match(/^([0-9]+(?:\.[0-9]+)?)(k{1,4}|m|mrd|b)?$/)
-  if (!match) {
-    const digits = normalized.replace(/[^0-9]/g, '')
-    return digits ? BigInt(digits) : null
-  }
-
-  const amount = Number(match[1])
-  if (!Number.isFinite(amount)) return null
-  const multiplier = {
-    k: 1_000,
-    kk: 1_000_000,
-    kkk: 1_000_000_000,
-    kkkk: 1_000_000_000_000,
-    m: 1_000_000,
-    mrd: 1_000_000_000,
-    b: 1_000_000_000_000,
-  }[match[2] ?? ''] ?? 1
-  return BigInt(Math.round(amount * multiplier))
+  const match = normalized.match(/^(\d+)(?:\.(\d+))?(k{1,4}|m|mrd|b)?$/)
+  if (!match) return null
+  const multiplier =
+    {
+      k: 1_000n,
+      kk: 1_000_000n,
+      kkk: 1_000_000_000n,
+      kkkk: 1_000_000_000_000n,
+      m: 1_000_000n,
+      mrd: 1_000_000_000n,
+      b: 1_000_000_000_000n,
+    }[match[3] ?? ''] ?? 1n
+  const fraction = match[2] ?? ''
+  const scale = 10n ** BigInt(fraction.length)
+  const numerator = BigInt(`${match[1]}${fraction}`) * multiplier
+  return (numerator * 2n + scale) / (scale * 2n)
 }
 
 export function normalizePrice(value: string): string {

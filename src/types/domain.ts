@@ -48,6 +48,7 @@ export type WikiMeta = {
 export type UserPrice = {
   marketPrice: string
   updatedAt: string
+  source?: 'manual' | 'game'
 }
 
 export type Bonus = {

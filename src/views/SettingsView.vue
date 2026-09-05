@@ -1,64 +1,235 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { AlertTriangle, Database, Download, Trash2, Upload } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { Download, Upload, Database, ShieldCheck, Trash2, RefreshCw, Sun, Moon } from '@lucide/vue'
 import { useDataStore } from '@/stores/data'
 import { useUserStore } from '@/stores/user'
+import { useThemeStore } from '@/stores/theme'
+import { migrateUserData, readImportFile, type PersistedState } from '@/domain/userData'
 import { formatDate } from '@/utils/format'
-
-const dataStore = useDataStore()
-const userStore = useUserStore()
-const fileInput = ref<HTMLInputElement>()
-const gamePriceInput = ref<HTMLInputElement>()
-const message = ref('')
-const messageType = ref<'success' | 'error'>('success')
-
-async function handleImport(event: Event) {
+import GamePriceImport from '@/components/GamePriceImport.vue'
+import DetailPanel from '@/components/DetailPanel.vue'
+const data = useDataStore(),
+  user = useUserStore(),
+  theme = useThemeStore()
+const fileInput = ref<HTMLInputElement>(),
+  preview = ref<PersistedState | null>(null),
+  confirmed = ref(false),
+  deleting = ref(false),
+  error = ref(''),
+  message = ref(''),
+  busy = ref(false)
+const priceCount = computed(
+  () => Object.values(preview.value?.prices ?? {}).filter((p) => p.marketPrice).length,
+)
+async function select(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0]
   if (!file) return
+  error.value = ''
+  message.value = ''
+  busy.value = true
+  confirmed.value = false
   try {
-    await userStore.importData(file)
-    messageType.value = 'success'
-    message.value = 'A mentés sikeresen betöltve.'
-  } catch (error) {
-    messageType.value = 'error'
-    message.value = error instanceof Error ? error.message : 'Sikertelen importálás.'
+    preview.value = migrateUserData(await readImportFile(file))
+  } catch (caught) {
+    error.value = caught instanceof Error ? caught.message : 'Sikertelen importálás.'
+  } finally {
+    busy.value = false
+    if (fileInput.value) fileInput.value.value = ''
   }
-  if (fileInput.value) fileInput.value.value = ''
 }
-
-async function handleGamePriceImport(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  try {
-    const result = await userStore.importGamePrices(file)
-    messageType.value = 'success'
-    message.value = `${result.imported} játékbeli ár sikeresen betöltve.${result.skipped ? ` ${result.skipped} hibás sor kihagyva.` : ''}`
-  } catch (error) {
-    messageType.value = 'error'
-    message.value = error instanceof Error ? error.message : 'A játékbeli árak betöltése sikertelen.'
+function restore() {
+  if (preview.value && confirmed.value) {
+    user.restore(preview.value)
+    preview.value = null
+    message.value = 'A mentés visszaállítva. A helyi mentés állapotát fent ellenőrizheted.'
   }
-  if (gamePriceInput.value) gamePriceInput.value.value = ''
 }
-
-function clearData() {
-  if (confirm('Biztosan törlöd az összes árat és a kisállat-gyűjteményt?')) {
-    userStore.clearAll(); messageType.value = 'success'; message.value = 'A helyi adatok törölve.'
+function requestClear() {
+  confirmed.value = false
+  deleting.value = true
+}
+function clear() {
+  if (confirmed.value) {
+    user.clearAll()
+    deleting.value = false
+    message.value = 'A jelenlegi helyi árlista és gyűjtemény törölve.'
   }
 }
 </script>
-
 <template>
   <div>
-    <header class="page-heading"><div><span class="eyebrow">ADATKEZELÉS</span><h1>Beállítások</h1><p>Készíts biztonsági mentést a saját árairól és a gyűjteményedről.</p></div></header>
-    <p v-if="message" class="notice" :class="messageType === 'success' ? 'notice--success' : 'notice--warning'">{{ message }}</p>
+    <header class="page-heading">
+      <div>
+        <span class="eyebrow">A HALADÁSOD ÉRTÉK</span>
+        <h1>Őrizd meg a kalandod.</h1>
+        <p>
+          Az árak, kisállatok és célok ezen a böngészőn élnek. Egy biztonsági mentéssel másik eszközre is
+          magaddal viheted őket.
+        </p>
+      </div>
+      <span class="badge badge--jade"><ShieldCheck :size="15" /> HELYI ADATOK</span>
+    </header>
+    <p v-if="error" class="notice notice--error" role="alert">{{ error }}</p>
+    <p v-if="message" class="notice notice--success" role="status">{{ message }}</p>
     <div class="settings-grid">
-      <section class="settings-card"><div class="settings-card__icon"><Download /></div><div><h2>Biztonsági mentés</h2><p>Az árlista és a megszerzett kisállatok egyetlen JSON-fájlba kerülnek.</p><button class="button button--primary" @click="userStore.exportData"><Download :size="17" /> Mentés letöltése</button></div></section>
-      <section class="settings-card"><div class="settings-card__icon"><Upload /></div><div><h2>Mentés visszaállítása</h2><p>Egy korábban letöltött Venor Helper mentés betöltése.</p><input ref="fileInput" hidden type="file" accept="application/json,.json" @change="handleImport" /><button class="button" @click="fileInput?.click()"><Upload :size="17" /> Fájl kiválasztása</button></div></section>
-      <section class="settings-card settings-card--wide game-price-import"><div class="settings-card__icon"><Upload /></div><div><h2>Játékbeli árak importálása</h2><p>Válaszd ki a <code>C:\Venor2\shop\price_history_vnum.json</code> fájlt. Az árak hozzáadódnak a jelenlegi listához, az azonos tárgyak korábbi árait pedig frissítik.</p><input ref="gamePriceInput" hidden type="file" accept="application/json,.json" @change="handleGamePriceImport" /><button class="button button--primary" @click="gamePriceInput?.click()"><Upload :size="17" /> Játékbeli árlista feltöltése</button><small>A <code>price_history_hash.json</code> fájl nem használható.</small></div></section>
-      <section class="settings-card settings-card--wide"><div class="settings-card__icon"><Database /></div><div><h2>Wiki-adatcsomag</h2><dl><div><dt>Forrás</dt><dd><a :href="dataStore.meta.source" target="_blank" rel="noreferrer">wiki.venor2.hu</a></dd></div><div><dt>Frissítve</dt><dd>{{ formatDate(dataStore.meta.generatedAt) }}</dd></div><div><dt>Tárgyadatok</dt><dd :class="{ warning: !dataStore.meta.completeItems }">{{ dataStore.meta.completeItems ? 'Teljes' : 'Részleges' }}</dd></div><div><dt>Kisállatok</dt><dd :class="{ warning: !dataStore.meta.completePets }">{{ dataStore.meta.completePets ? 'Teljes' : 'Szinkronizálás szükséges' }}</dd></div></dl><p v-if="dataStore.meta.note" class="data-note"><AlertTriangle :size="16" /> {{ dataStore.meta.note }}</p><code class="command">npm run sync-data</code></div></section>
-      <section class="settings-card settings-card--danger"><div class="settings-card__icon"><Trash2 /></div><div><h2>Helyi adatok törlése</h2><p>Minden megadott ár és gyűjteményjelölés véglegesen törlődik ebből a böngészőből.</p><button class="button button--danger" @click="clearData"><Trash2 :size="17" /> Minden törlése</button></div></section>
+      <section class="panel settings-card">
+        <span class="settings-icon"><Download :size="23" /></span
+        ><span class="eyebrow">01 / BIZTONSÁGI MENTÉS</span>
+        <h2>Egy fájl. Minden haladásod.</h2>
+        <p>
+          {{ user.pricedItemCount }} ár, {{ user.ownedPets.size }} megszerzett kisállat és
+          {{ user.targetPets.size }} gyűjteménycél egy JSON-fájlban.
+        </p>
+        <button class="button button--primary" @click="user.exportData">
+          <Download :size="16" /> Mentés letöltése
+        </button>
+      </section>
+      <section class="panel settings-card">
+        <span class="settings-icon"><Upload :size="23" /></span
+        ><span class="eyebrow">02 / VISSZAÁLLÍTÁS</span>
+        <h2>Folytasd, ahol abbahagytad.</h2>
+        <p>
+          A korábbi v2 és az új v3 mentéseket is fogadjuk. Előnézet után, csak a jóváhagyásoddal cseréljük le
+          a jelenlegi adatokat.
+        </p>
+        <input
+          ref="fileInput"
+          hidden
+          type="file"
+          accept="application/json,.json"
+          aria-label="Biztonsági mentés fájl"
+          @change="select"
+        /><button class="button" :disabled="busy" @click="fileInput?.click()">
+          <Upload :size="16" /> {{ busy ? 'Ellenőrzés…' : 'Mentés kiválasztása' }}
+        </button>
+      </section>
+      <section class="panel settings-card settings-wide import-settings">
+        <div>
+          <span class="eyebrow">03 / JÁTÉKBELI ÁRAK</span>
+          <h2>Hozd magaddal a piacot.</h2>
+          <p>
+            Válaszd ki a <code>C:\Venor2\shop\price_history_vnum.json</code> fájlt. A hash-változat nem
+            támogatott. Az importált árakat egységárként mentjük.
+          </p>
+        </div>
+        <GamePriceImport />
+      </section>
+      <section class="panel settings-card">
+        <span class="eyebrow">04 / MEGJELENÉS</span>
+        <h2>Obszidián vagy elefántcsont?</h2>
+        <p>Ugyanaz a jade és arany karakter, nappali és esti kalandokhoz.</p>
+        <div class="theme-choices">
+          <button
+            class="theme-choice dark-preview"
+            :aria-pressed="theme.isDark"
+            @click="theme.setTheme('dark')"
+          >
+            <Moon :size="20" /><strong>Obszidián</strong><small>Sötét téma</small></button
+          ><button
+            class="theme-choice light-preview"
+            :aria-pressed="!theme.isDark"
+            @click="theme.setTheme('light')"
+          >
+            <Sun :size="20" /><strong>Elefántcsont</strong><small>Világos téma</small>
+          </button>
+        </div>
+      </section>
+      <section class="panel settings-card">
+        <span class="eyebrow">05 / ELLENŐRZÖTT FORRÁS</span>
+        <h2><Database :size="20" /> Wiki-adatcsomag</h2>
+        <dl class="data-facts">
+          <div>
+            <dt>Forrás</dt>
+            <dd>
+              <a :href="data.meta.source" target="_blank" rel="noreferrer" class="text-link"
+                >wiki.venor2.hu ↗</a
+              >
+            </dd>
+          </div>
+          <div>
+            <dt>Frissítve</dt>
+            <dd>{{ formatDate(data.meta.generatedAt) }}</dd>
+          </div>
+          <div>
+            <dt>Tárgyak / kisállatok</dt>
+            <dd>{{ data.items.length }} / {{ data.pets.length }}</dd>
+          </div>
+          <div>
+            <dt>Teljesség</dt>
+            <dd>
+              {{
+                data.meta.completeItems && data.meta.completePets
+                  ? 'Teljes wiki-csomag'
+                  : 'Részleges wiki-csomag'
+              }}
+            </dd>
+          </div>
+        </dl>
+        <p class="small-copy">
+          A kézi javítások a wiki fölé kerülnek. A csomag dátuma nem a piaci árak frissességét jelzi.
+        </p>
+        <button class="button" :disabled="data.loading" @click="data.load(true)">
+          <RefreshCw :size="15" /> {{ data.loading ? 'Betöltés…' : 'Csomag újratöltése' }}
+        </button>
+      </section>
+      <section class="panel settings-card settings-wide danger-zone">
+        <div>
+          <span class="eyebrow">VESZÉLYZÓNA</span>
+          <h2>Tiszta lap, ha tényleg ezt szeretnéd.</h2>
+          <p>
+            A jelenlegi árakat, megszerzett kisállatokat és célokat törli. A korábbi v2 migrációs mentés külön
+            megmarad.
+          </p>
+        </div>
+        <button class="button button--danger" @click="requestClear">
+          <Trash2 :size="16" /> Helyi adatok törlése
+        </button>
+      </section>
     </div>
+    <DetailPanel :open="!!preview" title="Mentés visszaállítása" @close="preview = null"
+      ><template v-if="preview"
+        ><div class="notice notice--warning">
+          Ez nem összevonás. A jelenlegi árlista, gyűjtemény és célok teljesen lecserélődnek.
+        </div>
+        <div class="restore-comparison">
+          <span>Jelenleg</span
+          ><strong
+            >{{ user.pricedItemCount }} ár · {{ user.ownedPets.size }} kisállat ·
+            {{ user.targetPets.size }} cél</strong
+          ><span>A kiválasztott mentésben</span
+          ><strong
+            >{{ priceCount }} ár · {{ preview.ownedPets.length }} kisállat ·
+            {{ preview.targetPets.length }} cél</strong
+          >
+        </div>
+        <button class="button" @click="user.exportData">
+          <Download :size="16" /> Előbb mentem a jelenlegi adatokat</button
+        ><label class="confirmation"
+          ><input v-model="confirmed" type="checkbox" /> Megértettem, hogy a jelenlegi adatokat
+          lecserélem.</label
+        >
+        <div class="actions">
+          <button class="button button--primary" :disabled="!confirmed" @click="restore">
+            Mentés visszaállítása</button
+          ><button class="button" @click="preview = null">Mégse</button>
+        </div></template
+      ></DetailPanel
+    ><DetailPanel :open="deleting" title="Helyi adatok törlése" @close="deleting = false"
+      ><p class="notice notice--warning">
+        A törlést csak egy korábbi mentés visszaállításával vonhatod vissza.
+      </p>
+      <button class="button" @click="user.exportData">
+        <Download :size="16" /> Biztonsági mentés letöltése</button
+      ><label class="confirmation"
+        ><input v-model="confirmed" type="checkbox" /> Törlöm a jelenlegi árakat, gyűjteményt és
+        célokat.</label
+      >
+      <div class="actions">
+        <button class="button button--danger" :disabled="!confirmed" @click="clear">
+          Igen, minden jelenlegi adat törlése</button
+        ><button class="button" @click="deleting = false">Mégse</button>
+      </div></DetailPanel
+    >
   </div>
 </template>
-
 <style scoped src="./SettingsView.css"></style>

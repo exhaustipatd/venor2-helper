@@ -3,10 +3,18 @@ import { ref, watch } from 'vue'
 import { Package } from '@lucide/vue'
 import { useDataStore } from '@/stores/data'
 
-const props = withDefaults(defineProps<{ vnum: number; size?: number; alt?: string }>(), { size: 44, alt: '' })
+const props = withDefaults(defineProps<{ vnum: number; size?: number; alt?: string }>(), {
+  size: 44,
+  alt: '',
+})
 const dataStore = useDataStore()
 const failed = ref(false)
-watch(() => props.vnum, () => { failed.value = false })
+watch(
+  () => dataStore.iconFor(props.vnum),
+  () => {
+    failed.value = false
+  },
+)
 </script>
 
 <template>

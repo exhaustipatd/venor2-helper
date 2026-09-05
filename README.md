@@ -1,69 +1,108 @@
 # Venor Helper
 
-Magyar nyelvű Vue 3 webalkalmazás a Venor2 NPC-boltjaihoz, piaci áraihoz és kisállat-gyűjteményéhez.
+Magyar nyelvű, nem hivatalos Venor2 játéksegédlet. Vue 3 + TypeScript + Pinia, statikus GitHub Pages tárhely, helyben tárolt adatok. Nincs fiók, háttérszerver vagy élő piaci adatkapcsolat.
 
 ## Funkciók
 
-- NPC-k és összes bolti ajánlatuk
-- tárgyalapú csereköltségek és profit számítása
-- külön csere-összehasonlító piaci vásárlással, láncolt NPC-váltásokkal és profit szerinti rangsorral
-- egységes piaci árak helyi mentése
-- külön Kisállatok oldal név-, bónusz- és gyűjteményszűrővel
-- megszerzett kisállatok jelölése
-- magyar számformátum és Metin2-es `k`, `kk`, `kkk`, `kkkk`, `b` árbevitel (`1b` = 1 billió)
-- JSON biztonsági mentés és visszaállítás
-- helyben tárolt tárgyikonok
-- reszponzív világos és sötét téma, rendszerbeállítás szerinti első választással
+- **Áttekintés:** pozitív becsült eredményű cserék, hiányzó árak prioritása, gyűjtemény és célok.
+- **Cserekereső:** piaci vásárlás és körmentes, láncolt NPC-váltások; kinyitható beszerzési útvonalak.
+- **Mennyiségtervező:** egész váltási csomagok, bevásárlólista, sorrendbe rendezett lépések és megmaradó tárgyak.
+- **NPC-boltok:** keresés kereskedőre, ajánlatra és VNUM-ra; összecsukható receptek.
+- **Kisállatok:** egységes gyűjteménykártyák, bónuszszűrés, megszerzett állapot, kitűzött célok, részletpanel.
+- **Árlista:** egységes saját árak, hét napnál régebbi árak jelzése, továbbváltások, importálási előnézet.
+- **Biztonsági mentések:** v2 és v3 import, teljes csere előtti megerősítés, export, tárhelyhiba-jelzés.
+- **Obsidian & Jade:** sötét obszidián/jade/arany és világos elefántcsont téma; helyi betűk és tárgyikonok.
 
 ## Indítás
 
+Node.js **24** szükséges (a CI is ezt használja).
+
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Éles build:
+Éles build és helyi megtekintés:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## GitHub Pages
+A publikált alkalmazás: **https://exhaustipatd.github.io/venor2-helper/**
 
-Az alkalmazás itt érhető el: **https://exhaustipatd.github.io/venor2-helper/**
+A navigáció hash-alapú. A keresések és kiválasztások az URL-ben maradnak, ezért megoszthatók. A `VITE_BASE_PATH` környezeti változóval állítható a publikálási alkönyvtár.
 
-A `main` ágra történő minden push után a [Deploy to GitHub Pages](https://github.com/exhaustipatd/venor2-helper/actions/workflows/deploy-pages.yml) workflow futtatja a teszteket, elkészíti az éles buildet, majd publikálja az oldalt. A GitHub Pages alatti közvetlen navigáció megbízhatósága érdekében a publikált alkalmazás hash-alapú útvonalakat használ.
+## Árak és számítások
 
-## Wiki-adatok frissítése
+Az ármezők értik a `k`, `kk`, `kkk`, `kkkk`, `m`, `mrd` és `b` rövidítést. **1b = 1 billió Yang.** Példák: `500kk`, `1,5mrd`, `1 250 000`. A feldolgozás egész `BigInt` aritmetikát használ, nem lebegőpontos szorzást. Hibás és negatív ár nem írja felül a korábbi értéket.
 
-A tárgyak, kisállatok, NPC-boltok és ajánlatok óvatos frissítése:
+- Enter vagy mezőelhagyás: mentés.
+- Escape: a szerkesztés elvetése.
+- Üres mező: hiányzó ár. A nulla érvényes, ingyenes ár.
+- Egyetlen saját egységárat használunk vételre és becsült eladásra is.
+- A cserekártyák egységár-becslései felfelé kerekítettek; nem azonosak a tényleges csomagbeszerzés készpénzigényével.
+- A mennyiségtervező a kiválasztott alapanyagútvonal teljes csomagköltségét számolja, és újra felhasználja a maradékokat.
+- A tervező összehasonlítja a közvetlen piacot és a rendelkezésre álló gyökérrecepteket. **Nem keres minden receptkombináció között globális mennyiségi optimumot.**
+- Körkörös váltás, nem árazott Gaya/más valuta, hiányzó ár nem szerepel teljes Yang-tervként.
+- Nincs piaci készlet-, eladhatósági, adó- vagy meglévő játékbeli készletfeltételezés. A profit becslés, nem garancia. A maradék tárgyak nem számítanak automatikusan eladási bevételnek.
+
+## Helyi mentések
+
+- Új mentés: `venor-helper:user-data:v3` (`prices`, `ownedPets`, `targetPets`).
+- Korábbi mentés: `venor-helper:user-data:v2`. Automatikusan beolvassuk, ha még nincs v3. Az eredeti v2 kulcsot nem töröljük.
+- Téma: `venor-helper:theme`.
+- Sérült mentés esetén az automatikus felülírás blokkolt; az eredeti adat külön letölthető. Ellenőrzött mentés visszaállítása vagy megerősített törlés oldja fel a blokkolást.
+- A tárhely írási hibái látható figyelmeztetést kapnak. Ilyenkor tölts le JSON-mentést, mielőtt bezárod az oldalt.
+- A mentés visszaállítása **teljes csere**, nem összevonás. A játékbeli árimport csak az érintett árakat írja felül.
+- Importméret: legfeljebb 5 MB. Játékbeli árakhoz a `C:\Venor2\shop\price_history_vnum.json` fájl használható, nem a hash-változat.
+
+## Wiki-adatok karbantartása
+
+Először csak ellenőrizd a változásokat:
+
+```bash
+npm run sync-data -- --dry-run
+```
+
+Frissítés:
 
 ```bash
 npm run sync-data
+npm run validate-data
 ```
 
-A szinkronizáló **semmilyen ikont vagy médiafájlt nem kér le**, és a meglévő helyi képeket érintetlenül hagyja. A külön, böngészőből importált ikonok VNUM-leképezése újraépíthető:
+A szinkronizáló:
+
+1. Helyreállítja az esetleg félbeszakadt csomagcserét.
+2. Legalább 10 másodperces szünettel lekéri a tárgyakat és boltokat. Kérésenként 30 másodperces időkorlát és legfeljebb négy próbálkozás van.
+3. Ellenőrzi a sémát, egész számokat, azonosítókat, árakat és kisállatok jelenlétét.
+4. Tíz százaléknál nagyobb elemszámcsökkenésnél megáll. Kézi ellenőrzés után a `--allow-shrink` kapcsoló engedélyezi.
+5. Az új csomagot külön mappába készíti el. A régi csomag biztonsági másolata megmarad a publikálásig; sikertelen csere esetén visszaállítja.
+
+A frissítés **nem kér le médiafájlokat**, és megőrzi a kézi javításokat (`item-overrides.json`, `shop-overrides.json`). Egy boltban a javítás az azonos eredménytárgyhoz tartozó wiki-ajánlatokat helyettesíti. Más tárgy ajánlatsorrendjével ütköző javítás érvénytelen csomagot jelent, nem csendes törlést.
+
+A `VENOR_SYNC_DELAY_MS` növeli a kérések közti szünetet. A `VENOR_WIKI_URL` alternatív forrást adhat meg. Egyszerre csak egy szinkronizálás futhat. Folyamatösszeomlás után, **ha biztosan nem fut másik szinkronizálás**, törölhető a `.venor-sync-lock` mappa, majd a parancs újrafuttatható. Ne töröld kézzel a `public/data.backup` helyreállítási mappát.
+
+Helyi ikonleképezések újraépítése:
 
 ```bash
 npm run rebuild-icon-map
 ```
 
-Ez a parancs kizárólag a helyi adat- és képfájlokat olvassa; nem indít hálózati kérést.
+Ez csak helyi fájlokat olvas. Új ikonok beszerzése külön, kézi feladat.
 
-A két adatlekérés között alapértelmezetten 10 másodperc szünet van. Ez a `VENOR_SYNC_DELAY_MS` környezeti változóval növelhető. A szinkronizáló csak akkor írja felül az adatfájlokat, ha a tárgy-, bolt- és kisállatadatokat is sikeresen ellenőrizte.
+## Fejlesztés
 
-A wikiből hiányzó vagy javított kézi ajánlatok a `public/data/shop-overrides.json` fájlban vannak. Betöltéskor ezek felülírják az azonos boltban, azonos eredménytárgyhoz tartozó wiki-ajánlatot, ezért egy későbbi szinkronizálás sem törli őket.
+```bash
+npm run lint           # ESLint: TypeScript és Vue
+npm run format         # Prettier
+npm run format:check
+npm run validate-data  # Sémák, hivatkozások és helyi ikonok
+npm test               # Meglévő Vitest egységtesztek
+npm run check          # Ellenőrzések + egységtesztek + build
+```
 
-## Stílusok
+A pull requestek ellenőrzést kapnak; a `main` ágra pusholt, sikeresen ellenőrzött build a GitHub Pages-re kerül. Böngészős tesztkeretrendszer nincs a projektben; a felület ellenőrzése kézi.
 
-- `src/styles/colors.css`: központi világos/sötét színváltozók
-- `src/styles/common.css`: újrahasznált globális elemek
-- `src/components/*.css`: komponensekhez rendelt stílusok
-- `src/views/*.css`: oldalankénti stílusok
-
-A betűkészletek is helyileg, az alkalmazás buildjében találhatók.
-
-## Helyi adatok
-
-A felhasználói árak és a gyűjtemény a `venor-helper:user-data:v2`, a témaválasztás pedig a `venor-helper:theme` localStorage-kulcs alatt tárolódik. A Beállítások oldalon az árak és a gyűjtemény exportálhatók és importálhatók.
+A kódszerkezet és a kézi ellenőrzőlista: [docs/MAINTENANCE.md](docs/MAINTENANCE.md).

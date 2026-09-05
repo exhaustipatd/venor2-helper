@@ -5,3 +5,6 @@ dist/
 .env.*
 !.env.example
 .DS_Store
+.venor-sync-lock/
+public/data.backup/
+public/data.next/

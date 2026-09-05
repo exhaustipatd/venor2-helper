@@ -1,51 +1,63 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, useId, watch } from 'vue'
 import { formatInteger, normalizePrice, parsePrice } from '@/utils/format'
-
-const props = withDefaults(defineProps<{
-  modelValue: string
-  label?: string
-  compact?: boolean
-}>(), { label: 'Ár', compact: false })
-const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
-const editing = ref(false)
-const localValue = ref(props.modelValue)
-
-watch(() => props.modelValue, (value) => {
-  if (!editing.value) localValue.value = value
+const props = withDefaults(defineProps<{ modelValue: string; label?: string; compact?: boolean }>(), {
+  label: 'Piaci ár',
+  compact: false,
 })
-
-function focus() {
-  editing.value = true
-  localValue.value = props.modelValue
-}
-
+const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
+const editing = ref(false),
+  localValue = ref(props.modelValue),
+  error = ref(''),
+  id = useId()
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (!editing.value) localValue.value = value
+  },
+)
 function commit() {
   editing.value = false
+  if (localValue.value.trim() && parsePrice(localValue.value) === null) {
+    error.value = 'Érvénytelen ár. Példa: 500kk vagy 1,5b.'
+    return
+  }
+  error.value = ''
   const normalized = normalizePrice(localValue.value)
   localValue.value = normalized
-  emit('update:modelValue', normalized)
+  if (normalized !== props.modelValue) emit('update:modelValue', normalized)
+}
+function cancel(event: KeyboardEvent) {
+  localValue.value = props.modelValue
+  error.value = ''
+  ;(event.target as HTMLInputElement).blur()
 }
 </script>
-
 <template>
-  <label class="price-input" :class="{ 'price-input--compact': compact }">
-    <span>{{ label }}</span>
-    <div>
+  <div class="price-input" :class="{ 'price-input--compact': compact }">
+    <label :for="id">{{ label }}</label>
+    <div class="price-input__control">
       <input
+        :id="id"
         v-model="localValue"
         type="text"
         inputmode="decimal"
-        :placeholder="editing ? 'pl. 500kk' : 'Nincs megadva'"
-        :aria-label="label"
-        @focus="focus"
+        maxlength="100"
+        placeholder="pl. 500kk"
+        :aria-invalid="!!error"
+        :aria-describedby="`${id}-hint`"
+        @focus="editing = true"
         @blur="commit"
         @keydown.enter="($event.target as HTMLInputElement).blur()"
-      />
-      <small v-if="parsePrice(localValue) !== null">{{ formatInteger(parsePrice(localValue)!) }}</small>
-      <b>Yang</b>
+        @keydown.esc.stop="cancel"
+      /><b>Yang</b>
     </div>
-  </label>
+    <small :id="`${id}-hint`" :class="{ negative: error }">{{
+      error ||
+      (editing && parsePrice(localValue) !== null
+        ? `${formatInteger(parsePrice(localValue)!)} Yang · Enter a mentéshez`
+        : '')
+    }}</small>
+  </div>
 </template>
-
 <style scoped src="./PriceInput.css"></style>

@@ -1,81 +1,95 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import {
-  LayoutDashboard, Store, ArrowRightLeft, PawPrint, Tags, Settings, Menu, X, Database, Sun, Moon,
-} from '@lucide/vue'
+import { Menu, Sun, Moon, ShieldCheck, Database, ArrowUpRight, Leaf } from '@lucide/vue'
 import { useDataStore } from '@/stores/data'
 import { useThemeStore } from '@/stores/theme'
+import { useUserStore } from '@/stores/user'
 import { formatDate } from '@/utils/format'
-
-const route = useRoute()
-const dataStore = useDataStore()
-const themeStore = useThemeStore()
+import NavLinks from './NavLinks.vue'
+import DetailPanel from './DetailPanel.vue'
+const data = useDataStore(),
+  theme = useThemeStore(),
+  user = useUserStore(),
+  route = useRoute()
 const mobileOpen = ref(false)
-
-const nav = [
-  { to: '/', label: 'Áttekintés', icon: LayoutDashboard },
-  { to: '/boltok', label: 'NPC-boltok', icon: Store },
-  { to: '/osszehasonlitas', label: 'Cserekereső', icon: ArrowRightLeft },
-  { to: '/kisallatok', label: 'Kisállatok', icon: PawPrint },
-  { to: '/arlista', label: 'Árlista', icon: Tags },
-  { to: '/beallitasok', label: 'Beállítások', icon: Settings },
-]
+watch(
+  () => route.fullPath,
+  () => {
+    mobileOpen.value = false
+  },
+)
+const collection = computed(() => data.pets.filter((p) => user.isOwned(p.vnum)).length)
+const progress = computed(() =>
+  data.pets.length ? Math.round((collection.value / data.pets.length) * 100) : 0,
+)
 </script>
-
 <template>
   <div class="app-shell">
+    <a href="#main-content" class="skip-link">Ugrás a tartalomra</a>
     <header class="mobile-header">
-      <button class="icon-button" aria-label="Menü megnyitása" @click="mobileOpen = true"><Menu :size="22" /></button>
-      <RouterLink class="mobile-brand" to="/">VENOR<span>HELPER</span></RouterLink>
-      <button class="icon-button" :aria-label="themeStore.isDark ? 'Világos téma' : 'Sötét téma'" @click="themeStore.toggleTheme">
-        <Sun v-if="themeStore.isDark" :size="19" />
-        <Moon v-else :size="19" />
+      <button
+        class="icon-button"
+        aria-label="Menü megnyitása"
+        :aria-expanded="mobileOpen"
+        @click="mobileOpen = true"
+      >
+        <Menu :size="20" /></button
+      ><RouterLink to="/" class="mobile-brand">VENOR<span> / HELPER</span></RouterLink
+      ><button
+        class="icon-button"
+        :aria-label="theme.isDark ? 'Világos téma' : 'Sötét téma'"
+        @click="theme.toggleTheme"
+      >
+        <Sun v-if="theme.isDark" :size="18" /><Moon v-else :size="18" />
       </button>
     </header>
-
-    <div v-if="mobileOpen" class="sidebar-backdrop" @click="mobileOpen = false" />
-    <aside class="sidebar" :class="{ 'is-open': mobileOpen }">
-      <div class="brand-row">
-        <RouterLink class="brand" to="/" @click="mobileOpen = false">
-          <span class="brand__mark">V</span>
-          <span>VENOR<em>HELPER</em></span>
-        </RouterLink>
-        <button class="icon-button sidebar__close" aria-label="Menü bezárása" @click="mobileOpen = false"><X :size="20" /></button>
+    <aside class="sidebar">
+      <RouterLink class="brand" to="/" aria-label="Venor Helper kezdőlap"
+        ><span class="brand__mark">V</span
+        ><span>VENOR<small>THE ADVENTURER’S COMPANION</small></span></RouterLink
+      >
+      <div class="sidebar-caption"><span>SEGÉDLET</span><span>01 — 06</span></div>
+      <NavLinks />
+      <div class="sidebar-collection">
+        <div>
+          <Leaf :size="16" /><span>A gyűjteményed</span><strong>{{ progress }}%</strong>
+        </div>
+        <div class="progress-track"><span :style="{ width: `${progress}%` }" /></div>
+        <RouterLink to="/kisallatok"
+          >{{ collection }} / {{ data.pets.length }} kisállat <ArrowUpRight :size="13"
+        /></RouterLink>
       </div>
-      <p class="sidebar__eyebrow">JÁTÉKSEGÉDLET</p>
-      <nav class="sidebar__nav" aria-label="Fő navigáció">
-        <RouterLink
-          v-for="entry in nav"
-          :key="entry.to"
-          :to="entry.to"
-          :class="{ active: entry.to === '/' ? route.path === '/' : route.path.startsWith(entry.to) }"
-          @click="mobileOpen = false"
-        >
-          <component :is="entry.icon" :size="19" :stroke-width="1.8" />
-          <span>{{ entry.label }}</span>
-        </RouterLink>
-      </nav>
-      <div class="sidebar__bottom">
-        <button class="theme-toggle" @click="themeStore.toggleTheme">
-          <span><Sun v-if="themeStore.isDark" :size="17" /><Moon v-else :size="17" /></span>
-          <span><strong>{{ themeStore.isDark ? 'Világos téma' : 'Sötét téma' }}</strong><small>Megjelenés váltása</small></span>
+      <div class="sidebar-bottom">
+        <button class="theme-toggle" @click="theme.toggleTheme">
+          <Sun v-if="theme.isDark" :size="17" /><Moon v-else :size="17" /><span>{{
+            theme.isDark ? 'Világos téma' : 'Sötét téma'
+          }}</span
+          ><span class="theme-switch" :class="{ dark: theme.isDark }" />
         </button>
-        <div class="sidebar__source">
-          <Database :size="17" />
-          <div>
-            <span>Adatcsomag</span>
-            <strong>{{ dataStore.meta.generatedAt ? formatDate(dataStore.meta.generatedAt) : 'betöltés…' }}</strong>
-          </div>
-          <i :class="{ warning: !dataStore.meta.completeItems }" />
+        <div class="sidebar-source">
+          <Database :size="15" /><span
+            >Wiki-adatcsomag<strong>{{
+              data.meta.generatedAt ? formatDate(data.meta.generatedAt) : 'Betöltés…'
+            }}</strong></span
+          >
         </div>
       </div>
     </aside>
-
-    <main class="main-content">
-      <div class="content-wrap"><slot /></div>
-    </main>
+    <DetailPanel :open="mobileOpen" title="Venor Helper" @close="mobileOpen = false"
+      ><NavLinks @navigate="mobileOpen = false"
+    /></DetailPanel>
+    <div class="main-area">
+      <div class="desktop-topbar">
+        <span><span class="status-dot" /> VENOR2 <i>/</i> NEM HIVATALOS JÁTÉKSEGÉDLET</span
+        ><span><ShieldCheck :size="14" /> Helyben tárolva · fiók nélkül</span>
+      </div>
+      <main id="main-content" class="content-wrap" tabindex="-1"><slot /></main>
+      <footer class="app-footer">
+        <span>VENOR HELPER <i>✦</i> Játssz okosabban.</span
+        ><span>Wiki-adatok + saját árak. Nem élő piac.</span>
+      </footer>
+    </div>
   </div>
 </template>
-
 <style scoped src="./AppShell.css"></style>

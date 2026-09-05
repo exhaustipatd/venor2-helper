@@ -1,71 +1,290 @@
-.collection-total { min-width: 170px; padding: 15px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
-.collection-total span { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: var(--font-base); }
-.collection-total span svg { color: var(--purple); }
-.collection-total strong { display: block; margin-top: 4px; font: 700 24px "Space Grotesk", sans-serif; }
-.collection-total small { color: var(--muted-2); font-size: var(--font-copy); }
-.pet-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-.pet-card { position: relative; min-width: 0; padding: 18px; display: flex; flex-direction: column; border: 1px solid var(--line-soft); border-radius: 13px; background: var(--panel); overflow: hidden; transition: .18s ease; }
-.pet-card:hover { border-color: var(--line); transform: translateY(-1px); }
-.pet-card.owned { border-color: var(--accent-line); }
-.pet-card.owned::after { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
-.ownership { position: absolute; z-index: 2; top: 13px; right: 13px; height: 27px; padding: 0 8px; display: flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 7px; color: var(--muted); background: var(--panel); font-size: var(--font-xs); font-weight: 700; cursor: pointer; }
-.ownership span { width: 14px; height: 14px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 4px; }
-.pet-card.owned .ownership { color: var(--accent); border-color: var(--accent-line); background: var(--accent-bg-soft); }
-.pet-card.owned .ownership span { color: var(--accent-contrast); border-color: var(--accent); background: var(--accent); }
-.pet-card__visual { height: 94px; display: grid; place-items: center; }
-.pet-card__visual .item-icon { border: 0; background: radial-gradient(circle, var(--purple-glow), transparent 67%); }
-.pet-card__title { min-width: 0; margin: 2px 0 13px; text-align: center; }
-.pet-card__title h2 { margin: 0; overflow: hidden; font: 700 14px "Space Grotesk", sans-serif; text-overflow: ellipsis; white-space: nowrap; }
-.pet-card__title span { color: var(--muted-2); font-size: var(--font-sm); }
-.bonus-list { min-height: 80px; margin: 0 0 14px; padding: 10px 0; display: grid; align-content: start; gap: 7px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); list-style: none; }
-.bonus-list li { padding: 0 3px; display: flex; align-items: center; justify-content: space-between; gap: 10px; color: var(--muted); font-size: var(--font-sm); }
-.bonus-list li strong { color: var(--accent); font-size: var(--font-base); }
-.bonus-list li.highlighted { color: var(--purple); }
-.bonus-list li.muted { justify-content: center; color: var(--muted-2); }
-.pet-exchanges { margin-bottom: 12px; display: grid; gap: 7px; }
-.pet-exchanges__heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pet-exchanges__heading > span { color: var(--muted-2); font-size: var(--font-xs); font-weight: 800; letter-spacing: .8px; }
-.pet-exchanges__heading a { color: var(--accent); font-size: var(--font-xs); font-weight: 700; }
-.pet-exchanges__heading a:hover { text-decoration: underline; }
-.pet-exchange { border: 1px solid var(--line-soft); border-radius: 9px; background: var(--panel-soft); overflow: hidden; }
-.pet-exchange > header { min-height: 31px; padding: 6px 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line-soft); }
-.pet-exchange > header strong { overflow: hidden; font-size: var(--font-sm); text-overflow: ellipsis; white-space: nowrap; }
-.pet-exchange > header span { padding: 3px 5px; border: 1px solid var(--accent-line); border-radius: 5px; color: var(--accent); background: var(--accent-bg-soft); font-size: var(--font-micro); font-weight: 800; letter-spacing: .5px; }
-.pet-recipe { padding: 6px 8px; display: grid; gap: 4px; }
-.pet-recipe__item { min-width: 0; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; }
-.pet-recipe__item span { overflow: hidden; color: var(--muted); font-size: var(--font-xs); text-overflow: ellipsis; white-space: nowrap; }
-.pet-recipe__item > strong { color: var(--text); font-size: var(--font-xs); }
-.pet-ingredient-routes { grid-column: 1 / -1; margin: 2px 0 6px; display: grid; gap: 5px; }
-.pet-acquisition { padding: 7px; display: grid; gap: 7px; border: 1px solid var(--line-soft); border-radius: 7px; background: var(--panel); }
-.pet-acquisition--best { border-color: var(--accent-line); background: var(--accent-bg-soft); }
-.pet-acquisition > header { display: flex; align-items: center; gap: 6px; }
-.pet-acquisition > header > span { min-width: 0; flex: 1; color: var(--muted); font-size: var(--font-xs); font-weight: 700; text-overflow: ellipsis; white-space: nowrap; overflow: hidden; }
-.pet-acquisition > header > b { padding: 2px 4px; border-radius: 4px; color: var(--accent); background: var(--accent-bg); font-size: var(--font-micro); letter-spacing: .4px; }
-.pet-acquisition > header > strong { color: var(--text); font-size: var(--font-xs); white-space: nowrap; }
-.pet-acquisition__recipe { display: grid; gap: 7px; }
-.pet-acquisition__ingredient { display: grid; gap: 5px; }
-.pet-acquisition__ingredient > div { min-width: 0; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 5px; }
-.pet-acquisition__ingredient > div > span { overflow: hidden; color: var(--muted); font-size: var(--font-xs); text-overflow: ellipsis; white-space: nowrap; }
-.pet-acquisition__ingredient > div > strong { font-size: var(--font-xs); }
-.pet-acquisition__fixed { min-height: 24px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: var(--font-xs); }
-.pet-acquisition__fixed strong { color: var(--text); }
-.pet-acquisition__fixed--warning strong { color: var(--amber); }
-.pet-recipe__fixed { min-height: 24px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: var(--font-xs); }
-.pet-recipe__fixed strong { color: var(--text); }
-.pet-recipe__fixed--warning strong { color: var(--amber); }
-.pet-exchange > footer { padding: 8px; display: grid; gap: 4px; border-top: 1px solid var(--line-soft); }
-.pet-exchange > footer > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.pet-exchange > footer span { color: var(--muted); font-size: var(--font-xs); }
-.pet-exchange > footer strong { font: 700 var(--font-base) "Space Grotesk", sans-serif; }
-.pet-exchange > footer small { color: var(--muted-2); font-size: var(--font-micro); line-height: 1.4; }
-.pet-exchange__profit strong { color: var(--accent); }
-.pet-exchange__profit.negative strong { color: var(--red); }
-.pet-exchanges--empty { min-height: 34px; padding: 9px; border: 1px dashed var(--line); border-radius: 8px; color: var(--muted-2); font-size: var(--font-xs); text-align: center; }
-.pet-card__prices { margin-top: auto; display: grid; gap: 8px; }
-
-@media (max-width: 1100px) { .pet-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) {
-  .pet-grid { grid-template-columns: 1fr; }
-  .collection-total { width: 100%; }
-  .pet-card__prices { grid-template-columns: 1fr; }
+.collection-total {
+  min-width: 170px;
+  padding: 18px 22px;
+  border: 1px solid var(--gold-line);
+  border-radius: 12px;
+  background: var(--panel);
+}
+.collection-total > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.collection-total > strong {
+  display: block;
+  font: 500 32px var(--numbers);
+  margin: 7px 0 12px;
+}
+.collection-total small {
+  color: var(--muted);
+  font-size: 18px;
+}
+.bonus-minimum {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.bonus-minimum input {
+  width: 65px;
+  height: 44px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--text);
+  background: var(--input-bg);
+}
+.pet-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.pet-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: linear-gradient(160deg, var(--panel-raised), var(--panel) 60%);
+  transition:
+    transform 0.18s,
+    border-color 0.18s;
+}
+.pet-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--gold-line);
+}
+.pet-card.owned {
+  border-color: var(--accent-line);
+}
+.pet-card.owned::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: var(--accent);
+}
+.pet-card.targeted {
+  background: linear-gradient(150deg, var(--gold-bg), var(--panel) 55%);
+}
+.pet-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pet-number {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: var(--numbers);
+}
+.target-button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--muted);
+}
+.target-button.active {
+  color: var(--gold);
+  background: var(--gold-bg);
+  border-color: var(--gold-line);
+}
+.pet-open {
+  display: grid;
+  justify-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  width: 100%;
+}
+.pet-stage {
+  position: relative;
+  height: 120px;
+  width: 100%;
+  display: grid;
+  place-items: center;
+}
+.pet-halo {
+  position: absolute;
+  width: 105px;
+  height: 105px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-glow), transparent 68%);
+}
+.pet-stage > .item-icon {
+  position: relative;
+  background: transparent;
+  border: 0;
+}
+.pet-open h2 {
+  font: 500 17px var(--display);
+  margin: 8px 0;
+  min-height: 44px;
+  display: grid;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+.pet-state {
+  font-size: 8px;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+}
+.targeted .pet-state {
+  color: var(--gold);
+}
+.owned .pet-state {
+  color: var(--accent);
+}
+.bonus-list {
+  list-style: none;
+  margin: 20px 0;
+  padding: 15px 0;
+  border-top: 1px solid var(--line-soft);
+  border-bottom: 1px solid var(--line-soft);
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  flex: 1;
+}
+.bonus-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.bonus-list strong {
+  color: var(--text);
+  font-family: var(--numbers);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.bonus-list .highlighted {
+  color: var(--accent);
+}
+.bonus-list .highlighted strong {
+  color: var(--accent);
+}
+.pet-cost {
+  margin-top: auto;
+}
+.pet-cost > span {
+  color: var(--muted);
+  font-size: 10px;
+  display: block;
+}
+.pet-cost > strong {
+  display: block;
+  font-size: 19px;
+  margin: 3px 0 17px;
+}
+.pet-card__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  align-items: center;
+}
+.ownership {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  background: var(--panel-soft);
+  font-size: 10px;
+  font-weight: 700;
+}
+.ownership.active {
+  color: var(--accent);
+  background: var(--accent-bg);
+  border-color: var(--accent-line);
+}
+.pet-detail-link {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--gold);
+  font-size: 10px;
+  padding: 3px;
+}
+.pet-detail-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.pet-detail-hero p {
+  font-size: 12px;
+  margin: 8px 0;
+}
+@media (max-width: 1400px) {
+  .pet-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1100px) {
+  .pet-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .pet-grid {
+    gap: 10px;
+  }
+  .pet-card {
+    padding: 12px;
+  }
+  .pet-open h2 {
+    font-size: 14px;
+  }
+  .pet-card__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .pet-detail-link {
+    justify-content: center;
+  }
+  .bonus-list li {
+    font-size: 10px;
+    gap: 5px;
+  }
+  .pet-cost > strong {
+    font-size: 16px;
+  }
+  .pet-stage {
+    height: 100px;
+  }
+  .collection-total {
+    width: 100%;
+  }
+  .collection-total > strong {
+    font-size: 24px;
+  }
+  .pet-detail-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 360px) {
+  .pet-grid {
+    grid-template-columns: 1fr;
+  }
 }

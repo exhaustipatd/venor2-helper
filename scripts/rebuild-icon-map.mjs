@@ -1,4 +1,4 @@
-import { readFile, readdir, rename, unlink, writeFile } from 'node:fs/promises'
+import { readFile, readdir, rename, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const ROOT = process.cwd()
@@ -14,8 +14,11 @@ async function readJson(path) {
 async function atomicJson(path, value) {
   const temporary = `${path}.tmp`
   await writeFile(temporary, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
-  await unlink(path).catch(() => {})
-  await rename(temporary, path)
+  try {
+    await rename(temporary, path)
+  } finally {
+    await rm(temporary, { force: true })
+  }
 }
 
 const [items, itemOverrides, shops, shopOverrides, manifest, existingMap, iconFiles] = await Promise.all([
