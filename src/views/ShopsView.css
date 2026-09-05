@@ -1,0 +1,27 @@
+.browser-layout { display: grid; grid-template-columns: 244px minmax(0, 1fr); gap: 20px; align-items: start; }
+.browser-sidebar { position: sticky; top: 24px; max-height: calc(100vh - 48px); padding: 12px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--panel); overflow: hidden; }
+.browser-sidebar__count { margin: 13px 7px 8px; color: var(--muted-2); font-size: var(--font-sm); font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.npc-list { max-height: calc(100vh - 142px); display: grid; gap: 2px; overflow-y: auto; padding-right: 2px; }
+.npc-list button { width: 100%; min-height: 51px; padding: 6px 8px; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 8px; color: var(--muted); text-align: left; background: transparent; cursor: pointer; }
+.npc-list button:hover { background: var(--nav-hover-bg); }
+.npc-list button.active { color: var(--text); background: var(--selected-bg); }
+.npc-avatar { width: 31px; height: 31px; display: grid; flex: 0 0 auto; place-items: center; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.npc-list button.active .npc-avatar { color: var(--accent); border-color: var(--accent-line); background: var(--accent-bg-soft); }
+.npc-list button > span:last-child { min-width: 0; display: grid; gap: 3px; }
+.npc-list strong { overflow: hidden; font-size: var(--font-base); text-overflow: ellipsis; white-space: nowrap; }
+.npc-list small { color: var(--muted-2); font-size: var(--font-sm); }
+.merchant-header { min-height: 90px; margin-bottom: 14px; padding: 19px 21px; display: flex; align-items: center; gap: 15px; border: 1px solid var(--line-soft); border-radius: var(--radius); background: var(--panel); }
+.merchant-header__icon { width: 49px; height: 49px; display: grid; place-items: center; border: 1px solid var(--accent-line); border-radius: 12px; color: var(--accent); background: var(--accent-bg-soft); }
+.merchant-header h2 { margin: 2px 0; font: 700 20px "Space Grotesk", sans-serif; }
+.merchant-header p { margin: 0; color: var(--muted); font-size: var(--font-base); }
+.shop-tab + .shop-tab { margin-top: 28px; }
+.shop-tab__title { margin: 0 3px 10px; display: flex; align-items: center; justify-content: space-between; }
+.shop-tab__title h3 { margin: 0; font: 700 15px "Space Grotesk", sans-serif; }
+.shop-tab__title span { color: var(--muted-2); font-size: var(--font-base); }
+.offer-list { display: grid; gap: 10px; }
+
+@media (max-width: 820px) {
+  .browser-layout { grid-template-columns: 1fr; }
+  .browser-sidebar { position: static; max-height: none; }
+  .npc-list { max-height: 260px; }
+}

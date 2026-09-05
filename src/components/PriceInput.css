@@ -1,0 +1,8 @@
+.price-input { min-width: 0; display: grid; gap: 4px; }
+.price-input > span { color: var(--muted-2); font-size: var(--font-xs); font-weight: 700; letter-spacing: .4px; text-transform: uppercase; }
+.price-input > div { position: relative; height: 35px; display: flex; align-items: center; border: 1px solid var(--line); border-radius: 7px; background: var(--input-bg); }
+.price-input > div:focus-within { border-color: var(--accent-line); }
+.price-input input { width: 100%; min-width: 0; height: 100%; padding: 0 44px 0 9px; border: 0; outline: 0; color: var(--text); background: transparent; font-size: var(--font-base); }
+.price-input > div > b { position: absolute; right: 8px; color: var(--muted-2); font-size: var(--font-xs); pointer-events: none; }
+.price-input > div > small { display: none; }
+.price-input input::placeholder { color: var(--placeholder); }
