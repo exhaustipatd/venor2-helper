@@ -35,26 +35,15 @@ const staleCount = computed(
 </script>
 <template>
   <div class="dashboard">
-    <section class="dashboard-hero">
-      <div class="hero-copy">
-        <span class="eyebrow"><span /> A KÖVETKEZŐ LÉPÉS RAJTAD ÁLL</span>
-        <h1>Kevesebb találgatás.<br /><em>Több lehetőség.</em></h1>
-        <p>Ismerd az árát. Találd meg a jobb cserét.<br />Építs gyűjteményt, ne táblázatokat.</p>
-        <div class="actions">
-          <RouterLink class="button button--primary" to="/osszehasonlitas"
-            ><ArrowRightLeft :size="16" /> Cserék felfedezése <ArrowRight :size="15" /></RouterLink
-          ><RouterLink class="button button--ghost" to="/kisallatok">A gyűjteményem</RouterLink>
-        </div>
+    <header class="page-heading">
+      <h1>Áttekintés</h1>
+      <div class="actions">
+        <RouterLink class="button button--primary" to="/osszehasonlitas"
+          ><ArrowRightLeft :size="16" /> Cserekereső</RouterLink
+        >
+        <RouterLink class="button button--ghost" to="/kisallatok">Kisállatok</RouterLink>
       </div>
-      <div class="hero-art" aria-hidden="true">
-        <div class="seal-orbit seal-orbit--outer" />
-        <div class="seal-orbit seal-orbit--inner" />
-        <div class="seal-diamond" />
-        <span class="seal-north">✦</span>
-        <div class="seal-center"><span>V</span><small>VENOR II</small></div>
-        <span class="seal-label">TUDÁS · KERESKEDELEM · GYŰJTEMÉNY</span>
-      </div>
-    </section>
+    </header>
     <div class="dashboard-status">
       <span
         ><span class="status-jewel" /> Wiki: {{ formatDate(data.meta.generatedAt) }} ·
@@ -106,13 +95,12 @@ const staleCount = computed(
       <section class="panel opportunity-panel">
         <div class="panel-heading">
           <div>
-            <span class="eyebrow">A SZÁMAID ALAPJÁN</span>
-            <h2>Érdemes megnézned</h2>
+            <h2>Nyereséges cserék</h2>
           </div>
           <Sparkles :size="21" class="gold-icon" />
         </div>
         <template v-if="market.opportunities.length"
-          ><p class="section-intro">Pozitív becsült profit, a saját piaci áraidhoz képest.</p>
+          ><p class="section-intro">Becslés a saját piaci árak alapján.</p>
           <RouterLink
             v-for="(entry, index) in market.opportunities.slice(0, 4)"
             :key="entry.key"
@@ -132,26 +120,22 @@ const staleCount = computed(
         ></template>
         <div v-else class="opportunity-empty">
           <div class="empty-emblem"><ArrowRightLeft :size="28" /></div>
-          <h3>A jó csere egy jó árral kezdődik.</h3>
-          <p>
-            Importáld a játékbeli árlistádat, vagy adj meg néhány árat. Itt jelennek meg a pozitív becsült
-            eredményű cserék.
-          </p>
-          <GamePriceImport /><RouterLink class="text-link" to="/arlista">Inkább kézzel adom meg →</RouterLink>
+          <h3>Nincs ismert nyereséges csere</h3>
+          <p>Az árakat importálással vagy kézzel adhatod meg.</p>
+          <GamePriceImport /><RouterLink class="text-link" to="/arlista">Árak megadása →</RouterLink>
         </div>
       </section>
       <section class="panel collection-panel">
         <div class="panel-heading">
           <div>
-            <span class="eyebrow">APRÓ TÁRSAK, NAGY KALANDOK</span>
-            <h2>A gyűjteményed</h2>
+            <h2>Kisállat-gyűjtemény</h2>
           </div>
           <PawPrint :size="20" class="gold-icon" />
         </div>
         <div class="collection-progress">
           <strong>{{ progress }}<small>%</small></strong
           ><span
-            >{{ owned }} megszerzett<br /><b>{{ data.pets.length - owned }} még felfedezésre vár</b></span
+            >{{ owned }} megszerzett<br /><b>{{ data.pets.length - owned }} hiányzik</b></span
           >
         </div>
         <div class="progress-track"><span :style="{ width: `${progress}%` }" /></div>
@@ -164,7 +148,7 @@ const staleCount = computed(
             ><small>{{ user.isTarget(pet.vnum) ? 'KITŰZÖTT CÉL' : 'MÉG HIÁNYZIK' }}</small></RouterLink
           >
         </div>
-        <p v-if="!nextPets.length">Teljes a gyűjtemény. Szép munka!</p>
+        <p v-if="!nextPets.length">Teljes a gyűjtemény.</p>
         <RouterLink class="text-link panel-link" to="/kisallatok"
           >Gyűjtemény megnyitása <ArrowRight :size="14"
         /></RouterLink>
@@ -172,17 +156,13 @@ const staleCount = computed(
       <section class="panel missing-panel">
         <div class="panel-heading">
           <div>
-            <span class="eyebrow">TÖBB ÁR, TÖBB VÁLASZ</span>
-            <h2>Ezekkel érdemes kezdeni</h2>
+            <h2>Hiányzó árak</h2>
           </div>
           <RouterLink class="text-link" :to="{ path: '/arlista', query: { filter: 'missing' } }"
             >Összes hiányzó ár →</RouterLink
           >
         </div>
-        <p class="section-intro">
-          Hiányzó árak az érintett csereútvonalak száma szerint. Egy ár kitöltése önmagában nem feltétlenül
-          elég a teljes számításhoz.
-        </p>
+        <p class="section-intro">Az érintett ajánlatok száma szerint rendezve.</p>
         <div class="missing-grid">
           <RouterLink
             v-for="entry in market.missingPriorities.slice(0, 4)"
@@ -200,9 +180,6 @@ const staleCount = computed(
       </section>
     </div>
     <section v-if="user.pricedItemCount" class="import-strip">
-      <div>
-        <strong>Új árak a játékból?</strong><span>Frissíts egy fájllal. A gyűjteményed megmarad.</span>
-      </div>
       <GamePriceImport />
     </section>
   </div>

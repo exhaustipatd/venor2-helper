@@ -35,7 +35,7 @@ const progress = computed(() =>
         @click="mobileOpen = true"
       >
         <Menu :size="20" /></button
-      ><RouterLink to="/" class="mobile-brand">VENOR<span> / HELPER</span></RouterLink
+      ><RouterLink to="/" class="mobile-brand">VENOR2<span> / SEGÉDLET</span></RouterLink
       ><button
         class="icon-button"
         :aria-label="theme.isDark ? 'Világos téma' : 'Sötét téma'"
@@ -45,11 +45,9 @@ const progress = computed(() =>
       </button>
     </header>
     <aside class="sidebar">
-      <RouterLink class="brand" to="/" aria-label="Venor Helper kezdőlap"
-        ><span class="brand__mark">V</span
-        ><span>VENOR<small>THE ADVENTURER’S COMPANION</small></span></RouterLink
+      <RouterLink class="brand" to="/" aria-label="Venor2 segédlet kezdőlap"
+        ><span class="brand__mark">V</span><span>VENOR2<small>SEGÉDLET</small></span></RouterLink
       >
-      <div class="sidebar-caption"><span>SEGÉDLET</span><span>01 — 06</span></div>
       <NavLinks />
       <div class="sidebar-collection">
         <div>
@@ -76,7 +74,7 @@ const progress = computed(() =>
         </div>
       </div>
     </aside>
-    <DetailPanel :open="mobileOpen" title="Venor Helper" @close="mobileOpen = false"
+    <DetailPanel :open="mobileOpen" title="Menü" @close="mobileOpen = false"
       ><NavLinks @navigate="mobileOpen = false"
     /></DetailPanel>
     <div class="main-area">
@@ -86,8 +84,7 @@ const progress = computed(() =>
       </div>
       <main id="main-content" class="content-wrap" tabindex="-1"><slot /></main>
       <footer class="app-footer">
-        <span>VENOR HELPER <i>✦</i> Játssz okosabban.</span
-        ><span>Wiki-adatok + saját árak. Nem élő piac.</span>
+        <span>Wiki-adatok és saját árak; nem élő piaci adatok.</span>
       </footer>
     </div>
   </div>

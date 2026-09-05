@@ -55,9 +55,7 @@ function confirm() {
     <p v-if="error" class="negative" role="alert">{{ error }}</p>
     <p v-if="message" role="status"><CheckCheck :size="14" /> {{ message }}</p>
     <DetailPanel :open="!!preview" title="Árlista importálása" @close="preview = null"
-      ><template v-if="preview"
-        ><span class="eyebrow">ELLENŐRZÉS MENTÉS ELŐTT</span>
-        <h3 class="import-title">A piaci tudásod, frissítve.</h3>
+      ><template v-if="preview">
         <p>
           A <code>price_history_vnum.json</code> árait egységárra számítjuk. Az azonos tárgyak árait
           lecseréljük, a többi ár és a gyűjtemény megmarad.
@@ -95,10 +93,6 @@ function confirm() {
   gap: 6px;
   font-size: 12px;
   margin: 8px 0 0;
-}
-.import-title {
-  font: 500 25px var(--display);
-  margin-top: 14px;
 }
 .import-list {
   margin: 24px 0;

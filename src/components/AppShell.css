@@ -18,14 +18,15 @@
   align-items: center;
   gap: 13px;
   padding: 0 8px;
-  font: 500 27px var(--display);
-  letter-spacing: 3px;
+  margin-bottom: 32px;
+  font: 500 25px var(--display);
+  letter-spacing: 2px;
   color: var(--text-strong);
 }
 .brand small {
   display: block;
   font:
-    700 7px/1.5 Manrope,
+    700 11px/1.5 Manrope,
     sans-serif;
   letter-spacing: 1.3px;
   color: var(--gold);
@@ -42,15 +43,6 @@
   border: 1px solid var(--gold-line);
   border-radius: 12px 12px 20px 20px;
   text-shadow: 0 0 20px var(--accent-glow);
-}
-.sidebar-caption {
-  display: flex;
-  justify-content: space-between;
-  padding: 0 12px;
-  margin: 44px 0 17px;
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--muted-2);
 }
 .sidebar-collection {
   margin: 30px 7px;

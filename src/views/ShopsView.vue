@@ -6,11 +6,14 @@ import { useDataStore } from '@/stores/data'
 import { useQueryState } from '@/composables/useQueryState'
 import { normalizeSearchText } from '@/utils/search'
 import { itemName } from '@/utils/format'
-import type { ShopOffer } from '@/types/domain'
+import type { ShopOffer, ShopTab } from '@/types/domain'
 import OfferCard from '@/components/OfferCard.vue'
 const data = useDataStore(),
   route = useRoute(),
   router = useRouter()
+function tabLabel(tab: ShopTab) {
+  return tab.name === 'Gaya piac' ? 'Gaya-piac' : `Bolt #${tab.vnum}`
+}
 function selectNpc(id: number) {
   void router.replace({ query: { ...route.query, npc: String(id), tab: undefined } })
 }
@@ -43,12 +46,7 @@ const tabs = computed(
   <div>
     <header class="page-heading">
       <div>
-        <span class="eyebrow">MINDEN KERESKEDŐ, EGY HELYEN</span>
-        <h1>A kereskedők világa.</h1>
-        <p>
-          Böngéssz az NPC-k kínálatában. A receptek és az ármezők csak akkor nyílnak meg, amikor szükséged van
-          rájuk.
-        </p>
+        <h1>NPC-boltok</h1>
       </div>
       <span class="badge"><Store :size="14" /> {{ data.npcs.length }} NPC</span>
     </header>
@@ -100,12 +98,12 @@ const tabs = computed(
             :aria-pressed="tabSelection === String(tab.vnum)"
             @click="tabSelection = String(tab.vnum)"
           >
-            {{ tab.name }}
+            {{ tabLabel(tab) }}
           </button>
         </div>
         <section v-for="tab in tabs" :key="tab.vnum" class="shop-section">
-          <div class="panel-heading">
-            <h3>{{ tab.name }}</h3>
+          <div v-if="selected.tabs.length > 1" class="panel-heading">
+            <h3>{{ tabLabel(tab) }}</h3>
             <span class="badge">{{ tab.offers.length }} ajánlat</span>
           </div>
           <div class="shop-offers">

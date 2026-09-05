@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Download, Upload, Database, ShieldCheck, Trash2, RefreshCw, Sun, Moon } from '@lucide/vue'
+import { Download, Upload, Database, Trash2, RefreshCw, Sun, Moon } from '@lucide/vue'
 import { useDataStore } from '@/stores/data'
 import { useUserStore } from '@/stores/user'
 import { useThemeStore } from '@/stores/theme'
@@ -60,22 +60,15 @@ function clear() {
   <div>
     <header class="page-heading">
       <div>
-        <span class="eyebrow">A HALADÁSOD ÉRTÉK</span>
-        <h1>Őrizd meg a kalandod.</h1>
-        <p>
-          Az árak, kisállatok és célok ezen a böngészőn élnek. Egy biztonsági mentéssel másik eszközre is
-          magaddal viheted őket.
-        </p>
+        <h1>Beállítások</h1>
       </div>
-      <span class="badge badge--jade"><ShieldCheck :size="15" /> HELYI ADATOK</span>
     </header>
     <p v-if="error" class="notice notice--error" role="alert">{{ error }}</p>
     <p v-if="message" class="notice notice--success" role="status">{{ message }}</p>
     <div class="settings-grid">
       <section class="panel settings-card">
-        <span class="settings-icon"><Download :size="23" /></span
-        ><span class="eyebrow">01 / BIZTONSÁGI MENTÉS</span>
-        <h2>Egy fájl. Minden haladásod.</h2>
+        <span class="settings-icon"><Download :size="23" /></span>
+        <h2>Biztonsági mentés</h2>
         <p>
           {{ user.pricedItemCount }} ár, {{ user.ownedPets.size }} megszerzett kisállat és
           {{ user.targetPets.size }} gyűjteménycél egy JSON-fájlban.
@@ -85,13 +78,9 @@ function clear() {
         </button>
       </section>
       <section class="panel settings-card">
-        <span class="settings-icon"><Upload :size="23" /></span
-        ><span class="eyebrow">02 / VISSZAÁLLÍTÁS</span>
-        <h2>Folytasd, ahol abbahagytad.</h2>
-        <p>
-          A korábbi v2 és az új v3 mentéseket is fogadjuk. Előnézet után, csak a jóváhagyásoddal cseréljük le
-          a jelenlegi adatokat.
-        </p>
+        <span class="settings-icon"><Upload :size="23" /></span>
+        <h2>Mentés visszaállítása</h2>
+        <p>v2 vagy v3 mentés betöltése. Jóváhagyás után lecseréli a jelenlegi adatokat.</p>
         <input
           ref="fileInput"
           hidden
@@ -105,8 +94,7 @@ function clear() {
       </section>
       <section class="panel settings-card settings-wide import-settings">
         <div>
-          <span class="eyebrow">03 / JÁTÉKBELI ÁRAK</span>
-          <h2>Hozd magaddal a piacot.</h2>
+          <h2>Játékbeli árak importálása</h2>
           <p>
             Válaszd ki a <code>C:\Venor2\shop\price_history_vnum.json</code> fájlt. A hash-változat nem
             támogatott. Az importált árakat egységárként mentjük.
@@ -115,27 +103,24 @@ function clear() {
         <GamePriceImport />
       </section>
       <section class="panel settings-card">
-        <span class="eyebrow">04 / MEGJELENÉS</span>
-        <h2>Obszidián vagy elefántcsont?</h2>
-        <p>Ugyanaz a jade és arany karakter, nappali és esti kalandokhoz.</p>
+        <h2>Megjelenés</h2>
         <div class="theme-choices">
           <button
             class="theme-choice dark-preview"
             :aria-pressed="theme.isDark"
             @click="theme.setTheme('dark')"
           >
-            <Moon :size="20" /><strong>Obszidián</strong><small>Sötét téma</small></button
+            <Moon :size="20" /><strong>Sötét</strong></button
           ><button
             class="theme-choice light-preview"
             :aria-pressed="!theme.isDark"
             @click="theme.setTheme('light')"
           >
-            <Sun :size="20" /><strong>Elefántcsont</strong><small>Világos téma</small>
+            <Sun :size="20" /><strong>Világos</strong>
           </button>
         </div>
       </section>
       <section class="panel settings-card">
-        <span class="eyebrow">05 / ELLENŐRZÖTT FORRÁS</span>
         <h2><Database :size="20" /> Wiki-adatcsomag</h2>
         <dl class="data-facts">
           <div>
@@ -174,8 +159,7 @@ function clear() {
       </section>
       <section class="panel settings-card settings-wide danger-zone">
         <div>
-          <span class="eyebrow">VESZÉLYZÓNA</span>
-          <h2>Tiszta lap, ha tényleg ezt szeretnéd.</h2>
+          <h2>Helyi adatok törlése</h2>
           <p>
             A jelenlegi árakat, megszerzett kisállatokat és célokat törli. A korábbi v2 migrációs mentés külön
             megmarad.

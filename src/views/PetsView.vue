@@ -65,9 +65,7 @@ function bestPrice(id: number) {
   <div>
     <header class="page-heading">
       <div>
-        <span class="eyebrow">MINDEN TÁRS EGY ÚJ TÖRTÉNET</span>
-        <h1>A gyűjteményed.</h1>
-        <p>Találd meg a következő társad. Szűrj bónuszokra, tűzz ki célokat, és jelöld, ki tart már veled.</p>
+        <h1>Kisállatok</h1>
       </div>
       <div class="collection-total">
         <span><PawPrint :size="16" /> MEGSZEREZVE</span
@@ -107,7 +105,7 @@ function bestPrice(id: number) {
       </div>
     </section>
     <p class="result-line">
-      <strong>{{ filtered.length }}</strong> társ · A kitűzött célok elöl jelennek meg
+      <strong>{{ filtered.length }}</strong> kisállat
     </p>
     <section v-if="filtered.length" class="pet-grid">
       <article
@@ -135,13 +133,6 @@ function bestPrice(id: number) {
         >
           <span class="pet-stage"><span class="pet-halo" /><ItemIcon :vnum="pet.vnum" :size="78" /></span>
           <h2>{{ itemName(pet) }}</h2>
-          <span class="pet-state">{{
-            user.isTarget(pet.vnum)
-              ? 'A KÖVETKEZŐ CÉLOD'
-              : user.isOwned(pet.vnum)
-                ? 'A GYŰJTEMÉNYED RÉSZE'
-                : 'FELFEDEZÉSRE VÁR'
-          }}</span>
         </button>
         <ul class="bonus-list">
           <li
@@ -189,7 +180,6 @@ function bestPrice(id: number) {
         <div class="pet-detail-hero">
           <ItemIcon :vnum="selected.vnum" :size="92" />
           <div>
-            <span class="eyebrow">A KÖVETKEZŐ KALANDOD?</span>
             <p>#{{ selected.vnum }} · {{ user.isOwned(selected.vnum) ? 'Már megvan' : 'Még hiányzik' }}</p>
             <div class="actions">
               <button
@@ -221,21 +211,14 @@ function bestPrice(id: number) {
             @update:model-value="user.updatePrice(selected.vnum, $event)"
           /><PriceStatus :vnum="selected.vnum" />
         </div>
-        <div>
-          <span class="eyebrow">BESZERZÉSI LEHETŐSÉGEK</span>
-          <p class="result-line">
-            Egységár-becslések. A tényleges csomagköltséget a cserekeresőben tervezheted meg.
-          </p>
-        </div>
+        <h3>Beszerzési lehetőségek</h3>
         <OfferCard
           v-for="entry in market.byItem.get(selected.vnum) ?? []"
           :key="entry.key"
           :shop="entry.shop"
           :offer="entry.offer"
         />
-        <p v-if="!market.byItem.has(selected.vnum)" class="notice">
-          Nincs ismert NPC-váltás. A saját piaci áradat továbbra is rögzítheted.
-        </p>
+        <p v-if="!market.byItem.has(selected.vnum)" class="notice">Nincs ismert NPC-váltás.</p>
         <RouterLink
           v-if="market.byItem.has(selected.vnum)"
           class="button button--primary"

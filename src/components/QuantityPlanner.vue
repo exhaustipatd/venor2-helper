@@ -33,7 +33,7 @@ const routes = computed(() => {
     if (entry.source)
       candidates.push({
         key: entry.key,
-        label: `${entry.shop.npc_name} · ${entry.shop.name} #${entry.offer.order}`,
+        label: `${entry.shop.npc_name} · ${entry.offer.order}. ajánlat (bolt #${entry.shop.vnum})`,
         source: entry.source,
       })
   return candidates
@@ -67,14 +67,12 @@ const profit = computed(() =>
   <section class="quantity-planner panel">
     <div class="panel-heading">
       <div>
-        <span class="eyebrow">EGÉSZ CSOMAGOKKAL SZÁMOLVA</span>
         <h2>Mennyiségtervező</h2>
       </div>
       <ShoppingBasket :size="22" class="positive" />
     </div>
     <p class="planner-description">
-      Mennyi Yang kell a beszerzéshez? A váltások egész csomagokra kerekítve, a megmaradó alapanyagok újra
-      felhasználva.
+      Egész váltási csomagokkal számol, a megmaradó alapanyagokat újra felhasználja.
     </p>
     <div class="planner-controls">
       <label
@@ -130,9 +128,8 @@ const profit = computed(() =>
       másik útvonalat.
     </p>
     <p class="planner-note">
-      A tervek az egységár alapján kiválasztott alapanyagútvonalakat használják; nem keresünk minden
-      lehetséges receptkombinációt. Körkörös váltásokat kizárunk. Nincs készlet-, adó- vagy piaci elérhetőségi
-      feltételezés.
+      A tervező nem vizsgál minden receptkombinációt, és kizárja a körkörös váltásokat. Készletet, adót és
+      piaci elérhetőséget nem vesz figyelembe.
     </p>
   </section>
 </template>

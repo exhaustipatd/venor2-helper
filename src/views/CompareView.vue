@@ -49,14 +49,8 @@ const best = computed(() => (selected.value ? market.bestCosts.get(selected.valu
   <div>
     <header class="page-heading">
       <div>
-        <span class="eyebrow">A JÓ CSERE NEM VÉLETLEN</span>
-        <h1>Találd meg a jobb utat.</h1>
-        <p>
-          Piaci vásárlás vagy NPC-váltás? Hasonlítsd össze a költséget, értsd meg az útvonalat, és tervezz
-          egész csomagokkal.
-        </p>
+        <h1>Cserekereső</h1>
       </div>
-      <span class="badge badge--gold"><ArrowRightLeft :size="14" /> CSEREKERESŐ</span>
     </header>
     <div class="split-layout" :class="{ 'has-selection': !!selection && !!selected }">
       <aside class="browser-sidebar">
@@ -111,14 +105,7 @@ const best = computed(() => (selected.value ? market.bestCosts.get(selected.valu
           <div class="best-route-icon"><Crown :size="25" /></div>
           <div>
             <span class="eyebrow">LEGJOBB ISMERT EGYSÉGÁR</span>
-            <h3>{{ best.kind === 'market' ? 'Közvetlenül a játékospiacról' : best.npcName }}</h3>
-            <p>
-              {{
-                best.kind === 'market'
-                  ? 'A megadott piaci ár kedvezőbb vagy azonos.'
-                  : 'A megadott árak és a körmentes NPC-útvonalak alapján.'
-              }}
-            </p>
+            <h3>{{ best.kind === 'market' ? 'Játékospiac' : best.npcName }}</h3>
           </div>
           <strong><CurrencyAmount :value="best.unitCost" /><small>becslés / db</small></strong>
         </section>
@@ -142,8 +129,7 @@ const best = computed(() => (selected.value ? market.bestCosts.get(selected.valu
         <QuantityPlanner :vnum="selected.vnum" />
         <div class="panel-heading route-heading">
           <div>
-            <span class="eyebrow">AZ ÁR MÖGÖTTI ÚTVONAL</span>
-            <h2>Alternatív beszerzések</h2>
+            <h2>Beszerzési lehetőségek</h2>
           </div>
           <span class="badge">Költség / db szerint</span>
         </div>

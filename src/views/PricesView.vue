@@ -49,11 +49,9 @@ function toggle(id: number) {
   <div>
     <header class="page-heading">
       <div>
-        <span class="eyebrow">A SAJÁT PIACI TUDÁSOD</span>
-        <h1>Jó döntések, jó árakból.</h1>
+        <h1>Árlista</h1>
         <p>
-          Egy piaci egységár tárgyanként, beszerzéshez és becsült eladáshoz. A hét napnál régebbi árakat
-          érdemes ellenőrizni.
+          Az egységár vételre és eladásra is érvényes. A 7 napnál régebbi árakat ellenőrizendőként jelöljük.
         </p>
       </div>
       <GamePriceImport />
@@ -66,7 +64,7 @@ function toggle(id: number) {
           user.storageError
             ? 'Mentési hiba — készíts biztonsági mentést'
             : user.savedAt
-              ? 'Módosítások mentve ezen a böngészőn'
+              ? 'Mentve a böngészőben'
               : 'Helyi árlista · nincs automatikus piaci frissítés'
         }}</span
       >
@@ -91,8 +89,7 @@ function toggle(id: number) {
       </div>
     </section>
     <div class="result-line">
-      <strong>{{ filtered.length }}</strong> tárgy · Enter vagy mezőelhagyás: mentés · Escape: szerkesztés
-      elvetése · 1b = 1 billió Yang
+      <strong>{{ filtered.length }}</strong> tárgy · Enter: mentés · Esc: elvetés · 1b = 1 billió Yang
     </div>
     <table v-if="filtered.length" class="price-table">
       <caption class="sr-only">
@@ -169,8 +166,8 @@ function toggle(id: number) {
           <tr v-if="expanded.has(item.vnum)" class="usage-detail">
             <td colspan="4">
               <div class="downstream-panel">
-                <span class="eyebrow">EBBŐL KIVÁLTHATÓ</span
-                ><RouterLink
+                <h3>Ebből kiváltható</h3>
+                <RouterLink
                   v-for="entry in market.downstream.get(item.vnum)"
                   :key="entry.key"
                   :to="{ path: '/osszehasonlitas', query: { item: entry.offer.item_vnum } }"

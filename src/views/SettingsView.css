@@ -8,9 +8,6 @@
   align-items: flex-start;
   flex-direction: column;
 }
-.settings-card > .eyebrow {
-  font-size: 9px;
-}
 .settings-card h2 {
   display: flex;
   align-items: center;
@@ -115,9 +112,6 @@
 .danger-zone {
   border-color: var(--red-line);
   background: var(--red-bg-soft);
-}
-.danger-zone .eyebrow {
-  color: var(--red);
 }
 .danger-zone h2 {
   font-size: 20px;

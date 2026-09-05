@@ -116,7 +116,15 @@ export const useDataStore = defineStore('data', () => {
       warnings.value = nextWarnings
       loaded.value = true
     } catch (caught) {
-      error.value = caught instanceof Error ? caught.message : 'Ismeretlen betöltési hiba.'
+      if (caught instanceof Error && ['TimeoutError', 'AbortError'].includes(caught.name)) {
+        error.value = 'Az adatletöltés túllépte az időkorlátot. Próbáld újra.'
+      } else if (caught instanceof SyntaxError) {
+        error.value = 'Az adatfájl nem érvényes JSON.'
+      } else if (caught instanceof TypeError) {
+        error.value = 'Az adatletöltés nem sikerült. Ellenőrizd az internetkapcsolatot, majd próbáld újra.'
+      } else {
+        error.value = caught instanceof Error ? caught.message : 'Ismeretlen betöltési hiba.'
+      }
     } finally {
       loading.value = false
     }

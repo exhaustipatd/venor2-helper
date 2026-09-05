@@ -136,17 +136,6 @@
   align-items: center;
   overflow-wrap: anywhere;
 }
-.pet-state {
-  font-size: 8px;
-  letter-spacing: 1.2px;
-  color: var(--muted);
-}
-.targeted .pet-state {
-  color: var(--gold);
-}
-.owned .pet-state {
-  color: var(--accent);
-}
 .bonus-list {
   list-style: none;
   margin: 20px 0;
