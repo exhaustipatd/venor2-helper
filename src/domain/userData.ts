@@ -52,6 +52,23 @@ function whole(value: unknown): bigint | null {
   return typeof value === 'string' && /^\d{1,100}$/.test(value) ? BigInt(value) : null
 }
 export type GameImport = { prices: Record<string, UserPrice>; skipped: number }
+
+export function serializeGamePrices(prices: Record<string, UserPrice>): string {
+  const entries = Object.entries(prices)
+    .map(([key, entry]) => ({ id: Number(key), price: parsePrice(entry.marketPrice) }))
+    .filter(
+      (entry): entry is { id: number; price: bigint } =>
+        Number.isSafeInteger(entry.id) && entry.id > 0 && entry.price !== null,
+    )
+    .sort((a, b) => a.id - b.id)
+
+  if (!entries.length) return '[]\n'
+  const rows = entries.map(
+    ({ id, price }) => `  {\n    "key": ${id},\n    "price": ${price},\n    "count": 1\n  }`,
+  )
+  return `[\n${rows.join(',\n')}\n]\n`
+}
+
 export function parseGamePrices(value: unknown, now = new Date().toISOString()): GameImport {
   if (!Array.isArray(value) || !value.length) throw new Error('A játékbeli árlista üres vagy nem támogatott.')
   const prices: Record<string, UserPrice> = {}

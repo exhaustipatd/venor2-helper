@@ -97,7 +97,8 @@ function clear() {
           <h2>Játékbeli árak importálása</h2>
           <p>
             Válaszd ki a <code>C:\Venor2\shop\price_history_vnum.json</code> fájlt. A hash-változat nem
-            támogatott. Az importált árakat egységárként mentjük.
+            támogatott. Az importált árakat egységárként mentjük. Az exportgomb ugyanebben a formátumban tölti
+            le a weboldalon mentett árakat; a fájlt másold vissza ebbe a mappába.
           </p>
         </div>
         <GamePriceImport />

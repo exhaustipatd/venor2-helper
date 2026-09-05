@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Upload, CheckCheck } from '@lucide/vue'
+import { Upload, Download, CheckCheck } from '@lucide/vue'
 import { parseGamePrices, readImportFile, type GameImport } from '@/domain/userData'
 import { useUserStore } from '@/stores/user'
 import { useDataStore } from '@/stores/data'
@@ -49,9 +49,15 @@ function confirm() {
       accept="application/json,.json"
       aria-label="Játékbeli árlista fájl"
       @change="select"
-    /><button class="button button--primary" :disabled="busy" @click="input?.click()">
-      <Upload :size="16" /> {{ busy ? 'Fájl ellenőrzése…' : 'Játékbeli árak importálása' }}
-    </button>
+    />
+    <div class="game-price-actions">
+      <button class="button button--primary" :disabled="busy" @click="input?.click()">
+        <Upload :size="16" /> {{ busy ? 'Fájl ellenőrzése…' : 'Játékbeli árak importálása' }}
+      </button>
+      <button v-if="user.pricedItemCount" class="button" @click="user.exportGamePrices">
+        <Download :size="16" /> Árak exportálása játékhoz
+      </button>
+    </div>
     <p v-if="error" class="negative" role="alert">{{ error }}</p>
     <p v-if="message" role="status"><CheckCheck :size="14" /> {{ message }}</p>
     <DetailPanel :open="!!preview" title="Árlista importálása" @close="preview = null"
@@ -87,6 +93,11 @@ function confirm() {
   </div>
 </template>
 <style scoped>
+.game-price-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 .game-import > p {
   display: flex;
   align-items: center;

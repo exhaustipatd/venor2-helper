@@ -9,7 +9,7 @@ Magyar nyelvű, nem hivatalos Venor2 játéksegédlet. Vue 3 + TypeScript + Pini
 - **Mennyiségtervező:** egész váltási csomagok, bevásárlólista, sorrendbe rendezett lépések és megmaradó tárgyak.
 - **NPC-boltok:** keresés kereskedőre, ajánlatra és VNUM-ra; összecsukható receptek.
 - **Kisállatok:** egységes gyűjteménykártyák, bónuszszűrés, megszerzett állapot, kitűzött célok, részletpanel.
-- **Árlista:** egységes saját árak, hét napnál régebbi árak jelzése, továbbváltások, importálási előnézet.
+- **Árlista:** egységes saját árak, hét napnál régebbi árak jelzése, továbbváltások, játékbeli JSON import és export.
 - **Biztonsági mentések:** v2 és v3 import, teljes csere előtti megerősítés, export, tárhelyhiba-jelzés.
 - **Obsidian & Jade:** sötét obszidián/jade/arany és világos elefántcsont téma; helyi betűk és tárgyikonok.
 
@@ -55,7 +55,7 @@ Az ármezők értik a `k`, `kk`, `kkk`, `kkkk`, `m`, `mrd` és `b` rövidítést
 - Sérült mentés esetén az automatikus felülírás blokkolt; az eredeti adat külön letölthető. Ellenőrzött mentés visszaállítása vagy megerősített törlés oldja fel a blokkolást.
 - A tárhely írási hibái látható figyelmeztetést kapnak. Ilyenkor tölts le JSON-mentést, mielőtt bezárod az oldalt.
 - A mentés visszaállítása **teljes csere**, nem összevonás. A játékbeli árimport csak az érintett árakat írja felül.
-- Importméret: legfeljebb 5 MB. Játékbeli árakhoz a `C:\Venor2\shop\price_history_vnum.json` fájl használható, nem a hash-változat.
+- Importméret: legfeljebb 5 MB. Játékbeli árakhoz a `C:\Venor2\shop\price_history_vnum.json` fájl használható, nem a hash-változat. Az árlista exportja ugyanezzel a fájlnévvel és formátumban készül; minden mentett egységár `count: 1` sor lesz.
 
 ## Wiki-adatok karbantartása
 

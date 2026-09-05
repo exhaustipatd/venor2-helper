@@ -6,6 +6,7 @@ import {
   emptyState,
   LEGACY_KEY,
   migrateUserData,
+  serializeGamePrices,
   STORAGE_KEY,
   type GameImport,
   type PersistedState,
@@ -95,6 +96,9 @@ export const useUserStore = defineStore('user', () => {
       `venor-helper-${new Date().toISOString().slice(0, 10)}.json`,
     )
   }
+  function exportGamePrices() {
+    download(serializeGamePrices(prices.value), 'price_history_vnum.json')
+  }
   function exportOriginal() {
     try {
       download(
@@ -138,6 +142,7 @@ export const useUserStore = defineStore('user', () => {
     toggleTarget,
     serialize,
     exportData,
+    exportGamePrices,
     exportOriginal,
     restore,
     applyGamePrices,
