@@ -34,8 +34,8 @@ const labels: Record<string, string> = {
   APPLY_ENCHANT_EARTH: 'Föld ereje',
   APPLY_ENCHANT_WIND: 'Szél ereje',
   APPLY_ENCHANT_ELECT: 'Villám ereje',
-  APPLY_SUNGMA_STR: 'Sung Ma akarata (ERŐ)',
-  APPLY_SUNGMA_HP: 'Sung Ma akarata (VIT)',
+  APPLY_SUNGMA_STR: 'Sungma erő',
+  APPLY_SUNGMA_HP: 'Sungma vit',
   APPLY_STR: 'Erő',
   APPLY_DEX: 'Ügyesség',
   APPLY_INT: 'Intelligencia',
@@ -55,6 +55,11 @@ export function bonusLabel(type: string): string {
   return labels[type] ?? humanize(type)
 }
 
+function formatBonus(type: string, value: number): string {
+  const percent = /PCT|BONUS|ATTBONUS|RESIST|SPEED|DROP|PERCENT|ENCHANT|MELEE_MAGIC/i.test(type)
+  return `${value > 0 ? '+' : ''}${value}${percent ? '%' : ''}`
+}
+
 export function itemBonuses(item: Item): Bonus[] {
   const result: Bonus[] = []
   for (let index = 0; index < 4; index += 1) {
@@ -62,13 +67,26 @@ export function itemBonuses(item: Item): Bonus[] {
     const rawValue = item[`apply_value${index}`]
     if (typeof type !== 'string' || !type || type === 'APPLY_NONE') continue
     const value = typeof rawValue === 'number' ? rawValue : Number(rawValue ?? 0)
-    const percent = /PCT|BONUS|ATTBONUS|RESIST|SPEED|DROP|PERCENT|ENCHANT|MELEE_MAGIC/i.test(type)
+    if (!Number.isFinite(value)) continue
     result.push({
       type,
       label: bonusLabel(type),
       value,
-      display: `${value > 0 ? '+' : ''}${value}${percent ? '%' : ''}`,
+      display: formatBonus(type, value),
     })
   }
   return result
+}
+
+/** Sum by bonus type, keeping flat and percentage bonuses separate. */
+export function totalItemBonuses(items: readonly Item[]): Bonus[] {
+  const totals = new Map<string, number>()
+  for (const item of items) {
+    for (const bonus of itemBonuses(item)) {
+      totals.set(bonus.type, (totals.get(bonus.type) ?? 0) + bonus.value)
+    }
+  }
+  return [...totals]
+    .map(([type, value]) => ({ type, label: bonusLabel(type), value, display: formatBonus(type, value) }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'hu') || a.type.localeCompare(b.type))
 }

@@ -5,7 +5,7 @@ import { useDataStore } from '@/stores/data'
 import { useUserStore } from '@/stores/user'
 import { useMarketStore } from '@/stores/market'
 import { useQueryState } from '@/composables/useQueryState'
-import { itemBonuses, bonusLabel } from '@/utils/bonuses'
+import { itemBonuses, bonusLabel, totalItemBonuses } from '@/utils/bonuses'
 import { itemName } from '@/utils/format'
 import { normalizeSearchText } from '@/utils/search'
 import ItemIcon from '@/components/ItemIcon.vue'
@@ -54,7 +54,9 @@ const filtered = computed(() =>
         itemName(a).localeCompare(itemName(b), 'hu'),
     ),
 )
-const owned = computed(() => data.pets.filter((p) => user.isOwned(p.vnum)).length)
+const ownedPets = computed(() => data.pets.filter((pet) => user.isOwned(pet.vnum)))
+const owned = computed(() => ownedPets.value.length)
+const ownedBonuses = computed(() => totalItemBonuses(ownedPets.value))
 const progress = computed(() => (data.pets.length ? Math.round((owned.value / data.pets.length) * 100) : 0))
 const selected = computed(() => data.pets.find((pet) => pet.vnum === Number(selection.value)))
 function bestPrice(id: number) {
@@ -78,6 +80,18 @@ function bestPrice(id: number) {
     <div v-if="!data.meta.completePets" class="notice notice--warning">
       A kisállat-adatcsomag részleges. A hiányzó adatokat az alkalmazás karbantartója frissíti.
     </div>
+    <section class="panel owned-bonuses" aria-labelledby="owned-bonuses-heading">
+      <h2 id="owned-bonuses-heading">Meglévő kisállatok összes bónusza</h2>
+      <dl v-if="ownedBonuses.length" class="owned-bonuses__list">
+        <div v-for="entry in ownedBonuses" :key="entry.type">
+          <dt>{{ entry.label }}</dt>
+          <dd>{{ entry.display }}</dd>
+        </div>
+      </dl>
+      <p v-else class="muted">
+        {{ owned ? 'A megjelölt kisállatokhoz nincs bónuszadat.' : 'Még nincs „Megvan” jelölésű kisállat.' }}
+      </p>
+    </section>
     <section class="filter-bar">
       <label class="search-field"
         ><Search :size="16" /><input
