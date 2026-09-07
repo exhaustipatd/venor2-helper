@@ -9,6 +9,19 @@
   color: var(--gold);
   flex-shrink: 0;
 }
+.npc-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.npc-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
 .merchant-header {
   display: flex;
   align-items: center;

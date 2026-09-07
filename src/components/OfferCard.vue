@@ -18,7 +18,7 @@ const market = useMarketStore(),
 const entry = computed(() => market.byKey.get(offerKey(props.shop, props.offer)))
 </script>
 <template>
-  <article v-if="entry" class="offer-card" :class="{ featured }">
+  <article class="offer-card" :class="{ featured: featured && !!entry }">
     <header>
       <div class="item-identity">
         <ItemIcon :vnum="offer.item_vnum" :size="44" />
@@ -29,7 +29,8 @@ const entry = computed(() => market.byKey.get(offerKey(props.shop, props.offer))
       </div>
       <span v-if="featured" class="badge badge--gold">KIEMELT ÚTVONAL</span>
     </header>
-    <div class="offer-metrics">
+    <p v-if="!entry" class="offer-warning">Inaktív NPC · Ez a váltás nem szerepel a számításokban.</p>
+    <div v-if="entry" class="offer-metrics">
       <div>
         <span>Becsült költség / db</span><strong><CurrencyAmount :value="entry.cost.unitCost" /></strong>
       </div>
@@ -37,7 +38,7 @@ const entry = computed(() => market.byKey.get(offerKey(props.shop, props.offer))
         <span>Becsült profit / db</span><strong><CurrencyAmount :value="entry.profit" signed /></strong>
       </div>
     </div>
-    <p v-if="!entry.cost.complete" class="offer-warning">
+    <p v-if="entry && !entry.cost.complete" class="offer-warning">
       {{
         entry.cyclic
           ? 'A jelenlegi alapanyagútvonal visszavezet ehhez a tárgyhoz; ezt a körkörös váltást nem rangsoroljuk.'
@@ -51,11 +52,14 @@ const entry = computed(() => market.byKey.get(offerKey(props.shop, props.offer))
     <details class="detail-disclosure" @toggle="open = ($event.target as HTMLDetailsElement).open">
       <summary>Recept és árak szerkesztése</summary>
       <div v-if="open" class="stack">
-        <RecipeRows :offer="offer" :sources="entry.source?.ingredients" /><PriceInput
+        <RecipeRows :offer="offer" :sources="entry?.source?.ingredients" /><PriceInput
           :label="`${itemName(data.getItem(offer.item_vnum))} piaci ára`"
           :model-value="user.priceFor(offer.item_vnum).marketPrice"
           @update:model-value="user.updatePrice(offer.item_vnum, $event)"
-        /><RouterLink class="text-link" :to="{ path: '/osszehasonlitas', query: { item: offer.item_vnum } }"
+        /><RouterLink
+          v-if="entry"
+          class="text-link"
+          :to="{ path: '/osszehasonlitas', query: { item: offer.item_vnum } }"
           >Összehasonlítás és mennyiségtervezés →</RouterLink
         >
       </div>

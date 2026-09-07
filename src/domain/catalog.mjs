@@ -87,6 +87,7 @@ export function applyShopOverrides(shops, overrides) {
   const result = shops.map((shop) => {
     const override = remaining.get(shop.vnum)
     if (!override) return shop
+    if (override.npc_vnum !== shop.npc_vnum) fail(`eltérő NPC a bolt felülírásában #${shop.vnum}`)
     remaining.delete(shop.vnum)
     const replaced = new Set(override.offers.map((offer) => offer.item_vnum))
     return {

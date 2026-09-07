@@ -1,15 +1,29 @@
 import type { UserPrice } from '@/types/domain'
 import { normalizePrice, parsePrice } from '@/utils/format'
 
-export const STORAGE_KEY = 'venor-helper:user-data:v3'
+export const STORAGE_KEY = 'venor-helper:user-data:v4'
+export const PREVIOUS_KEY = 'venor-helper:user-data:v3'
 export const LEGACY_KEY = 'venor-helper:user-data:v2'
 export type PersistedState = {
-  version: 3
+  version: 4
   prices: Record<string, UserPrice>
   ownedPets: number[]
   targetPets: number[]
+  npcEnabled: Record<string, boolean>
 }
-export const emptyState = (): PersistedState => ({ version: 3, prices: {}, ownedPets: [], targetPets: [] })
+export const emptyState = (): PersistedState => ({
+  version: 4,
+  prices: {},
+  ownedPets: [],
+  targetPets: [],
+  npcEnabled: {},
+})
+export function isNpcEnabled(settings: Record<string, boolean>, vnum: number): boolean {
+  return settings[String(vnum)] ?? vnum !== 60033
+}
+export function readStoredUserData(storage: Pick<Storage, 'getItem'>): string | null {
+  return storage.getItem(STORAGE_KEY) ?? storage.getItem(PREVIOUS_KEY) ?? storage.getItem(LEGACY_KEY)
+}
 const record = (value: unknown): value is Record<string, unknown> =>
   !!value && typeof value === 'object' && !Array.isArray(value)
 const validId = (value: unknown): value is number =>
@@ -19,7 +33,11 @@ function ids(value: unknown): number[] {
   return [...new Set(value)]
 }
 export function migrateUserData(value: unknown): PersistedState {
-  if (!record(value) || (value.version !== 2 && value.version !== 3) || !record(value.prices))
+  if (
+    !record(value) ||
+    (value.version !== 2 && value.version !== 3 && value.version !== 4) ||
+    !record(value.prices)
+  )
     throw new Error('Nem támogatott vagy sérült mentés.')
   const prices: Record<string, UserPrice> = {}
   for (const [key, entry] of Object.entries(value.prices)) {
@@ -40,11 +58,21 @@ export function migrateUserData(value: unknown): PersistedState {
       source: entry.source === 'game' ? 'game' : 'manual',
     }
   }
+  const npcEnabled: Record<string, boolean> = {}
+  if (value.version === 4) {
+    if (!record(value.npcEnabled)) throw new Error('Hibás NPC-beállítások a mentésben.')
+    for (const [key, enabled] of Object.entries(value.npcEnabled)) {
+      if (!/^[1-9]\d*$/.test(key) || !validId(Number(key)) || typeof enabled !== 'boolean')
+        throw new Error('Hibás NPC-beállítások a mentésben.')
+      npcEnabled[key] = enabled
+    }
+  }
   return {
-    version: 3,
+    version: 4,
     prices,
     ownedPets: ids(value.ownedPets),
-    targetPets: value.version === 3 ? ids(value.targetPets) : [],
+    targetPets: value.version === 2 ? [] : ids(value.targetPets),
+    npcEnabled,
   }
 }
 function whole(value: unknown): bigint | null {

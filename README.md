@@ -7,10 +7,10 @@ Magyar nyelvű, nem hivatalos Venor2 játéksegédlet. Vue 3 + TypeScript + Pini
 - **Áttekintés:** pozitív becsült eredményű cserék, hiányzó árak prioritása, gyűjtemény és célok.
 - **Cserekereső:** piaci vásárlás és körmentes, láncolt NPC-váltások; kinyitható beszerzési útvonalak.
 - **Mennyiségtervező:** egész váltási csomagok, bevásárlólista, sorrendbe rendezett lépések és megmaradó tárgyak.
-- **NPC-boltok:** keresés kereskedőre, ajánlatra és VNUM-ra; összecsukható receptek.
+- **NPC-boltok:** keresés kereskedőre, ajánlatra és VNUM-ra; összecsukható receptek; NPC-nként mentett kapcsoló. Az inaktív NPC-k böngészhetők, de a teljes beszerzési láncból kimaradnak. A szél kereskedő alapból inaktív.
 - **Kisállatok:** egységes gyűjteménykártyák, bónuszszűrés, megszerzett állapot, kitűzött célok, részletpanel.
 - **Árlista:** egységes saját árak, hét napnál régebbi árak jelzése, továbbváltások, játékbeli JSON import és export.
-- **Biztonsági mentések:** v2 és v3 import, teljes csere előtti megerősítés, export, tárhelyhiba-jelzés.
+- **Biztonsági mentések:** v2, v3 és v4 import, teljes csere előtti megerősítés, export, tárhelyhiba-jelzés.
 - **Obsidian & Jade:** sötét obszidián/jade/arany és világos elefántcsont téma; helyi betűk és tárgyikonok.
 
 ## Indítás
@@ -49,8 +49,9 @@ Az ármezők értik a `k`, `kk`, `kkk`, `kkkk`, `m`, `mrd` és `b` rövidítést
 
 ## Helyi mentések
 
-- Új mentés: `venor-helper:user-data:v3` (`prices`, `ownedPets`, `targetPets`).
-- Korábbi mentés: `venor-helper:user-data:v2`. Automatikusan beolvassuk, ha még nincs v3. Az eredeti v2 kulcsot nem töröljük.
+- Új mentés: `venor-helper:user-data:v4` (`prices`, `ownedPets`, `targetPets`, `npcEnabled`).
+- Korábbi mentések: először v3, majd v2, kizárólag ha újabb kulcs még nem létezik. Az eredeti kulcsokat nem töröljük; sérült újabb mentés esetén nem térünk vissza régebbihez.
+- Az `npcEnabled` NPC-VNUM alapján tárolja az egyéni kapcsolókat. Beállítás nélkül a 60033-as szél kereskedő inaktív, minden más NPC aktív. A régi mentések ezt az alapértéket kapják.
 - Téma: `venor-helper:theme`.
 - Sérült mentés esetén az automatikus felülírás blokkolt; az eredeti adat külön letölthető. Ellenőrzött mentés visszaállítása vagy megerősített törlés oldja fel a blokkolást.
 - A tárhely írási hibái látható figyelmeztetést kapnak. Ilyenkor tölts le JSON-mentést, mielőtt bezárod az oldalt.

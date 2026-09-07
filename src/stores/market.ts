@@ -8,10 +8,13 @@ import { calculateBestCosts, calculateOfferCost, offerKey, sourceForOffer } from
 export const useMarketStore = defineStore('market', () => {
   const data = useDataStore(),
     user = useUserStore()
+  const activeShops = computed(() => data.shops.filter((shop) => user.isNpcEnabled(shop.npc_vnum)))
   const entries = computed(() =>
-    data.shops.flatMap((shop) => shop.offers.map((offer) => ({ shop, offer, key: offerKey(shop, offer) }))),
+    activeShops.value.flatMap((shop) =>
+      shop.offers.map((offer) => ({ shop, offer, key: offerKey(shop, offer) })),
+    ),
   )
-  const bestCosts = computed(() => calculateBestCosts(data.shops, user.marketPrice))
+  const bestCosts = computed(() => calculateBestCosts(activeShops.value, user.marketPrice))
   const offers = computed(() =>
     entries.value.map((entry) => {
       const source = sourceForOffer(entry.shop, entry.offer, bestCosts.value)
@@ -87,5 +90,15 @@ export const useMarketStore = defineStore('market', () => {
         a.profit! === b.profit! ? a.key.localeCompare(b.key) : a.profit! > b.profit! ? -1 : 1,
       ),
   )
-  return { entries, bestCosts, offers, byKey, byItem, downstream, missingPriorities, opportunities }
+  return {
+    activeShops,
+    entries,
+    bestCosts,
+    offers,
+    byKey,
+    byItem,
+    downstream,
+    missingPriorities,
+    opportunities,
+  }
 })

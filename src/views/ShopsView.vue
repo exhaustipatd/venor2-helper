@@ -3,12 +3,14 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Search, Store, MapPin } from '@lucide/vue'
 import { useDataStore } from '@/stores/data'
+import { useUserStore } from '@/stores/user'
 import { useQueryState } from '@/composables/useQueryState'
 import { normalizeSearchText } from '@/utils/search'
 import { itemName } from '@/utils/format'
 import type { ShopOffer, ShopTab } from '@/types/domain'
 import OfferCard from '@/components/OfferCard.vue'
 const data = useDataStore(),
+  user = useUserStore(),
   route = useRoute(),
   router = useRouter()
 function tabLabel(tab: ShopTab) {
@@ -70,7 +72,9 @@ const tabs = computed(
             <span class="npc-avatar"><Store :size="17" /></span
             ><span
               ><strong>{{ npc.name }}</strong
-              ><small>{{ npc.offerCount }} ajánlat</small></span
+              ><small
+                >{{ npc.offerCount }} ajánlat{{ user.isNpcEnabled(npc.vnum) ? '' : ' · Inaktív' }}</small
+              ></span
             >
           </button>
         </div>
@@ -86,8 +90,20 @@ const tabs = computed(
             <span class="eyebrow"><MapPin :size="12" /> NPC #{{ selected.vnum }}</span>
             <h2>{{ selected.name }}</h2>
             <p>{{ selected.tabs.length }} boltfül · {{ selected.offerCount }} ajánlat</p>
+            <label class="npc-toggle">
+              <input
+                type="checkbox"
+                :checked="user.isNpcEnabled(selected.vnum)"
+                @change="user.setNpcEnabled(selected.vnum, ($event.target as HTMLInputElement).checked)"
+              />
+              Aktív a számításokban
+            </label>
           </div>
         </header>
+        <p v-if="!user.isNpcEnabled(selected.vnum)" class="notice notice--warning" role="status">
+          Inaktív kereskedő. Az ajánlatai megtekinthetők, de kimaradnak a költségekből és a beszerzési
+          tervekből.
+        </p>
         <div v-if="selected.tabs.length > 1" class="shop-tabs">
           <button class="button" :aria-pressed="tabSelection === 'all'" @click="tabSelection = 'all'">
             Összes</button

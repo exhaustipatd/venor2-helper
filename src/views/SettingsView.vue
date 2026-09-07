@@ -71,7 +71,7 @@ function clear() {
         <h2>Biztonsági mentés</h2>
         <p>
           {{ user.pricedItemCount }} ár, {{ user.ownedPets.size }} megszerzett kisállat és
-          {{ user.targetPets.size }} gyűjteménycél egy JSON-fájlban.
+          {{ user.targetPets.size }} gyűjteménycél, valamint az NPC-kapcsolók egy JSON-fájlban.
         </p>
         <button class="button button--primary" @click="user.exportData">
           <Download :size="16" /> Mentés letöltése
@@ -80,7 +80,7 @@ function clear() {
       <section class="panel settings-card">
         <span class="settings-icon"><Upload :size="23" /></span>
         <h2>Mentés visszaállítása</h2>
-        <p>v2 vagy v3 mentés betöltése. Jóváhagyás után lecseréli a jelenlegi adatokat.</p>
+        <p>v2, v3 vagy v4 mentés betöltése. Jóváhagyás után lecseréli a jelenlegi adatokat.</p>
         <input
           ref="fileInput"
           hidden
@@ -162,8 +162,8 @@ function clear() {
         <div>
           <h2>Helyi adatok törlése</h2>
           <p>
-            A jelenlegi árakat, megszerzett kisállatokat és célokat törli. A korábbi v2 migrációs mentés külön
-            megmarad.
+            A jelenlegi árakat, megszerzett kisállatokat és célokat törli, az NPC-kapcsolókat alaphelyzetbe
+            állítja. A korábbi v2 és v3 migrációs mentések külön megmaradnak.
           </p>
         </div>
         <button class="button button--danger" @click="requestClear">
@@ -174,17 +174,18 @@ function clear() {
     <DetailPanel :open="!!preview" title="Mentés visszaállítása" @close="preview = null"
       ><template v-if="preview"
         ><div class="notice notice--warning">
-          Ez nem összevonás. A jelenlegi árlista, gyűjtemény és célok teljesen lecserélődnek.
+          Ez nem összevonás. A jelenlegi árlista, gyűjtemény, célok és NPC-beállítások teljesen lecserélődnek.
         </div>
         <div class="restore-comparison">
           <span>Jelenleg</span
           ><strong
             >{{ user.pricedItemCount }} ár · {{ user.ownedPets.size }} kisállat ·
-            {{ user.targetPets.size }} cél</strong
+            {{ user.targetPets.size }} cél · {{ Object.keys(user.npcEnabled).length }} NPC-beállítás</strong
           ><span>A kiválasztott mentésben</span
           ><strong
             >{{ priceCount }} ár · {{ preview.ownedPets.length }} kisállat ·
-            {{ preview.targetPets.length }} cél</strong
+            {{ preview.targetPets.length }} cél ·
+            {{ Object.keys(preview.npcEnabled).length }} NPC-beállítás</strong
           >
         </div>
         <button class="button" @click="user.exportData">
@@ -206,8 +207,8 @@ function clear() {
       <button class="button" @click="user.exportData">
         <Download :size="16" /> Biztonsági mentés letöltése</button
       ><label class="confirmation"
-        ><input v-model="confirmed" type="checkbox" /> Törlöm a jelenlegi árakat, gyűjteményt és
-        célokat.</label
+        ><input v-model="confirmed" type="checkbox" /> Törlöm a jelenlegi árakat, gyűjteményt és célokat, az
+        NPC-kapcsolókat alaphelyzetbe állítom.</label
       >
       <div class="actions">
         <button class="button button--danger" :disabled="!confirmed" @click="clear">

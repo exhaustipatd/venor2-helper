@@ -6,8 +6,8 @@
 - `src/domain/userData.ts`: strict backup migration, game-price parsing, size limits, freshness policy.
 - `src/utils/cost.ts`: pure acquisition estimates, immutable cycle-free provenance, and batch planning. Keep all money as `bigint` in memory and decimal strings in user saves.
 - `src/stores/data.ts`: fetch a complete candidate snapshot, validate it, then publish together. Failed refreshes retain the previous snapshot. Icon failures are nonfatal and have a visible warning.
-- `src/stores/user.ts`: persistence, exports, explicit restore/reset, collection ownership and targets. Read v3 first; read v2 only when v3 does not exist. Never silently fall back to an older save when the current one is corrupt.
-- `src/stores/market.ts`: one shared computed acquisition index, offer summaries, downstream usages, and missing-price priorities. Views must not implement their own profit/cost arithmetic.
+- `src/stores/user.ts`: persistence, exports, explicit restore/reset, collection ownership, targets and per-NPC availability. Read v4 first, then v3, then v2 only when newer keys do not exist. Never silently fall back to an older save when the current one is corrupt. Unspecified NPCs are active except wind NPC 60033.
+- `src/stores/market.ts`: one shared computed acquisition index, offer summaries, downstream usages, and missing-price priorities, all derived from active shops only. Inactive NPC recipes remain browsable but must never enter provenance trees or planner routes. Views must not implement their own profit/cost arithmetic.
 - `src/composables/useQueryState.ts`: URL-backed filters. Update multiple query fields in one router call, preserving unrelated fields.
 - `src/components/`: common currency, price status, input, import preview, recipe rows/tree, offer cards, quantity planner, modal detail panel and navigation.
 - `src/styles/colors.css`: dark/light semantic color tokens. `common.css`: typography, focus, responsive layout and shared primitives. Page-specific CSS stays beside its view.
@@ -23,6 +23,10 @@ The planner executes a chosen provenance tree, rounds every NPC operation to who
 
 ## Data updates
 
+The targeted lightning event update on 2026-09-07 adds NPC 60035 (wiki shop 618), all 57 offers and the Kék Láng, Bambusz and Diana pets through overrides. Exchange prices come from the locally cached Hungarian wiki shops response; all 57 outputs and quantities match the user-saved merchant HTML. Icons come from that saved page and three static image downloads resolved through one icon-manifest request. Base snapshot metadata remains unchanged because this was not a full wiki refresh.
+
+The preserved summer NPC 60319 uses local shop ID 1000618: its former manually assigned ID 618 now belongs to the wiki lightning shop. Do not reuse this local ID for wiki shops. Override NPC identity must match the base shop; a collision blocks validation instead of mixing unrelated offers.
+
 1. Work on a branch with existing user/data changes understood.
 2. Run a dry-run sync and review count changes.
 3. Run the real sync. Review JSON diffs, especially removed offers and override interactions.
@@ -34,7 +38,8 @@ The sync lock prevents concurrent publishers. Directory promotion is recoverable
 ## Manual UI checklist
 
 - Start with an empty browser profile. The dashboard explains how to add prices without inventing opportunities.
-- Open a profile containing an existing v2 save. Prices and owned pets survive; editing creates v3 without removing v2.
+- Open profiles containing existing v2 and v3 saves. Prices, owned pets and available targets survive; editing creates v4 without removing the older keys. NPC settings survive reload and backup restore. A corrupt v4 must not fall back to v3.
+- Disable an NPC used as an intermediate recipe ingredient: costs, profit and quantity plans update, and its offers remain browsable with an inactive label. Re-enable it and verify all its tabs return to calculations. Check the default-inactive wind NPC.
 - Edit a price using `500kk`, `1,5mrd`, zero, a blank value, a negative value and malformed text. Invalid input must preserve the prior saved price. Escape cancels an edit.
 - Import game prices: inspect new/replaced/skipped counts, cancel without changes, then confirm. Existing unrelated prices and collection entries remain.
 - Restore a backup: the replace warning and unchecked confirmation must appear before mutation. Export the current state first. Repeat with malformed JSON.

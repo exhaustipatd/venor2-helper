@@ -54,6 +54,10 @@ const plans = computed(() =>
         )
     : [],
 )
+watch(routes, (available) => {
+  if (routeKey.value !== 'auto' && !available.some((route) => route.key === routeKey.value))
+    routeKey.value = 'auto'
+})
 const selected = computed(() =>
   routeKey.value === 'auto' ? plans.value[0] : plans.value.find((plan) => plan.key === routeKey.value),
 )

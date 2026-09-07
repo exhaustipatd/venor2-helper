@@ -4,7 +4,8 @@ import type { UserPrice } from '@/types/domain'
 import { normalizePrice, parsePrice } from '@/utils/format'
 import {
   emptyState,
-  LEGACY_KEY,
+  isNpcEnabled,
+  readStoredUserData,
   migrateUserData,
   serializeGamePrices,
   STORAGE_KEY,
@@ -18,7 +19,7 @@ export const useUserStore = defineStore('user', () => {
   let blocked = false
   let initial = emptyState()
   try {
-    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_KEY)
+    const raw = readStoredUserData(localStorage)
     if (raw) initial = migrateUserData(JSON.parse(raw))
   } catch {
     blocked = true
@@ -28,6 +29,11 @@ export const useUserStore = defineStore('user', () => {
   const prices = ref(initial.prices)
   const ownedPets = ref(new Set(initial.ownedPets))
   const targetPets = ref(new Set(initial.targetPets))
+  const npcEnabled = ref(initial.npcEnabled)
+  function setNpcEnabled(vnum: number, enabled: boolean) {
+    if (!Number.isSafeInteger(vnum) || vnum <= 0) return
+    npcEnabled.value = { ...npcEnabled.value, [vnum]: enabled }
+  }
   const pricedItemCount = computed(
     () => Object.values(prices.value).filter((price) => parsePrice(price.marketPrice) !== null).length,
   )
@@ -39,10 +45,11 @@ export const useUserStore = defineStore('user', () => {
   }
   function serialize(): PersistedState {
     return {
-      version: 3,
+      version: 4,
       prices: prices.value,
       ownedPets: [...ownedPets.value],
       targetPets: [...targetPets.value],
+      npcEnabled: { ...npcEnabled.value },
     }
   }
   function persist() {
@@ -101,10 +108,7 @@ export const useUserStore = defineStore('user', () => {
   }
   function exportOriginal() {
     try {
-      download(
-        localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_KEY) ?? '{}',
-        'venor-helper-eredeti.json',
-      )
+      download(readStoredUserData(localStorage) ?? '{}', 'venor-helper-eredeti.json')
     } catch {
       storageError.value = 'A böngésző nem engedi a helyi tárhely olvasását.'
     }
@@ -116,6 +120,7 @@ export const useUserStore = defineStore('user', () => {
     prices.value = validated.prices
     ownedPets.value = new Set(validated.ownedPets)
     targetPets.value = new Set(validated.targetPets)
+    npcEnabled.value = validated.npcEnabled
     persist()
   }
   function applyGamePrices(data: GameImport) {
@@ -124,11 +129,14 @@ export const useUserStore = defineStore('user', () => {
   function clearAll() {
     restore(emptyState())
   }
-  watch([prices, ownedPets, targetPets], persist, { deep: true })
+  watch([prices, ownedPets, targetPets, npcEnabled], persist, { deep: true })
   return {
     prices,
     ownedPets,
     targetPets,
+    npcEnabled,
+    isNpcEnabled: (id: number) => isNpcEnabled(npcEnabled.value, id),
+    setNpcEnabled,
     pricedItemCount,
     storageError,
     savedAt,

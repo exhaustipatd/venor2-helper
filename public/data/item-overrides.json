@@ -1,5 +1,43 @@
 [
   {
+    "vnum": 210164,
+    "name": "Kék Láng",
+    "locale_name": "Kék Láng",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_PET",
+    "apply_type0": "APPLY_ATTBONUS_MONSTER",
+    "apply_value0": 3
+  },
+  {
+    "vnum": 210085,
+    "name": "Bambusz",
+    "locale_name": "Bambusz",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_PET",
+    "apply_type0": "APPLY_NORMAL_HIT_DAMAGE_BONUS",
+    "apply_value0": 2,
+    "apply_type1": "APPLY_ATTBONUS_MONSTER",
+    "apply_value1": 2
+  },
+  {
+    "vnum": 210148,
+    "name": "Diana",
+    "locale_name": "Diana",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_PET",
+    "apply_type0": "APPLY_DOUBLE_DROP",
+    "apply_value0": 1,
+    "apply_type1": "APPLY_ATTBONUS_SUNGMA_STONE",
+    "apply_value1": 2,
+    "apply_type2": "APPLY_ENCHANT_ELECT",
+    "apply_value2": 10
+  },
+  {
+    "vnum": 220017,
+    "name": "Villám láda",
+    "locale_name": "Villám láda"
+  },
+  {
     "vnum": 210193,
     "name": "Kékike",
     "locale_name": "Kékike",
@@ -23,13 +61,55 @@
     "apply_type2": "APPLY_SUNGMA_HP",
     "apply_value2": 1
   },
-  { "vnum": 210953, "name": "Tengerparti penge", "locale_name": "Tengerparti penge", "type": "ITEM_COSTUME", "sub_type": "COSTUME_WEAPON" },
-  { "vnum": 210954, "name": "Tengerparti tőr", "locale_name": "Tengerparti tőr", "type": "ITEM_COSTUME", "sub_type": "COSTUME_WEAPON" },
-  { "vnum": 210955, "name": "Tengerparti íj", "locale_name": "Tengerparti íj", "type": "ITEM_COSTUME", "sub_type": "COSTUME_WEAPON" },
-  { "vnum": 210956, "name": "Tengerparti glefe", "locale_name": "Tengerparti glefe", "type": "ITEM_COSTUME", "sub_type": "COSTUME_WEAPON" },
-  { "vnum": 210957, "name": "Tengerparti harang", "locale_name": "Tengerparti harang", "type": "ITEM_COSTUME", "sub_type": "COSTUME_WEAPON" },
-  { "vnum": 210958, "name": "Tengerparti legyező", "locale_name": "Tengerparti legyező", "type": "ITEM_COSTUME", "sub_type": "COSTUME_WEAPON" },
-  { "vnum": 210959, "name": "Tengerparti kard", "locale_name": "Tengerparti kard", "type": "ITEM_COSTUME", "sub_type": "COSTUME_WEAPON" },
+  {
+    "vnum": 210953,
+    "name": "Tengerparti penge",
+    "locale_name": "Tengerparti penge",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_WEAPON"
+  },
+  {
+    "vnum": 210954,
+    "name": "Tengerparti tőr",
+    "locale_name": "Tengerparti tőr",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_WEAPON"
+  },
+  {
+    "vnum": 210955,
+    "name": "Tengerparti íj",
+    "locale_name": "Tengerparti íj",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_WEAPON"
+  },
+  {
+    "vnum": 210956,
+    "name": "Tengerparti glefe",
+    "locale_name": "Tengerparti glefe",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_WEAPON"
+  },
+  {
+    "vnum": 210957,
+    "name": "Tengerparti harang",
+    "locale_name": "Tengerparti harang",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_WEAPON"
+  },
+  {
+    "vnum": 210958,
+    "name": "Tengerparti legyező",
+    "locale_name": "Tengerparti legyező",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_WEAPON"
+  },
+  {
+    "vnum": 210959,
+    "name": "Tengerparti kard",
+    "locale_name": "Tengerparti kard",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_WEAPON"
+  },
   {
     "vnum": 211146,
     "name": "Rob (Tier 3)",
@@ -69,8 +149,68 @@
     "apply_type2": "APPLY_MAX_HP",
     "apply_value2": 2000
   },
-  { "vnum": 211177, "name": "Tengerparti viselet", "locale_name": "Tengerparti viselet", "type": "ITEM_COSTUME", "sub_type": "COSTUME_BODY" },
-  { "vnum": 211178, "name": "Tengerparti haj", "locale_name": "Tengerparti haj", "type": "ITEM_COSTUME", "sub_type": "COSTUME_HAIR" },
-  { "vnum": 220035, "name": "Fagylalt", "locale_name": "Fagylalt", "type": "ITEM_GIFTBOX", "sub_type": "0" },
-  { "vnum": 230115, "name": "Fagylaltgombóc", "locale_name": "Fagylaltgombóc", "type": "ITEM_MATERIAL", "sub_type": "0" }
+  {
+    "vnum": 211177,
+    "name": "Tengerparti viselet",
+    "locale_name": "Tengerparti viselet",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_BODY"
+  },
+  {
+    "vnum": 211178,
+    "name": "Tengerparti haj",
+    "locale_name": "Tengerparti haj",
+    "type": "ITEM_COSTUME",
+    "sub_type": "COSTUME_HAIR"
+  },
+  {
+    "vnum": 220035,
+    "name": "Fagylalt",
+    "locale_name": "Fagylalt",
+    "type": "ITEM_GIFTBOX",
+    "sub_type": "0"
+  },
+  {
+    "vnum": 230115,
+    "name": "Fagylaltgombóc",
+    "locale_name": "Fagylaltgombóc",
+    "type": "ITEM_MATERIAL",
+    "sub_type": "0"
+  },
+  {
+    "vnum": 230139,
+    "name": "Lightning map shard",
+    "locale_name": "Villám jegyzet",
+    "type": "ITEM_MATERIAL",
+    "sub_type": "MATERIAL_LEATHER",
+    "size": 1,
+    "anti_flags": "ANTI_DROP | ANTI_SELL",
+    "flags": "ITEM_STACKABLE",
+    "wear_flags": "NONE",
+    "immune_flags": "NONE",
+    "gold": 0,
+    "shop_buy_price": 0,
+    "refined_vnum": 0,
+    "refine_set": 0,
+    "limit_type0": "LIMIT_NONE",
+    "limit_value0": 0,
+    "limit_type1": "LIMIT_NONE",
+    "limit_value1": 0,
+    "apply_type0": "APPLY_NONE",
+    "apply_value0": 0,
+    "apply_type1": "APPLY_NONE",
+    "apply_value1": 0,
+    "apply_type2": "APPLY_NONE",
+    "apply_value2": 0,
+    "apply_type3": "APPLY_NONE",
+    "apply_value3": 0,
+    "value0": 0,
+    "value1": 0,
+    "value2": 0,
+    "value3": 0,
+    "value4": 0,
+    "value5": 0,
+    "specular": 0,
+    "addon_type": 0
+  }
 ]
