@@ -6,7 +6,7 @@ import shopOverrides from '../public/data/shop-overrides.json'
 describe('event shop catalog', () => {
   it('preserves wind and summer alongside all lightning alternatives after an upstream sync', () => {
     const base = validateShops(baseShops)
-    const overrides = validateShops(shopOverrides)
+    const overrides = validateShops(shopOverrides, true)
     const shops = validateShops(applyShopOverrides(base, overrides))
     const lightning = shops.find((shop) => shop.npc_vnum === 60035)!
     expect(lightning.vnum).toBe(618)
@@ -15,8 +15,10 @@ describe('event shop catalog', () => {
     expect(shops.find((shop) => shop.npc_vnum === 60033)?.offers).toEqual(
       base.find((shop) => shop.npc_vnum === 60033)?.offers,
     )
-    expect(shops.find((shop) => shop.npc_vnum === 60319)?.offers).toHaveLength(52)
-    const synced = validateShops(applyShopOverrides([...base, lightning], overrides))
+    expect(shops.find((shop) => shop.npc_vnum === 60319)?.offers).toHaveLength(62)
+    const synced = validateShops(
+      applyShopOverrides([...base.filter((shop) => shop.vnum !== lightning.vnum), lightning], overrides),
+    )
     expect(synced.sort((a, b) => a.vnum - b.vnum)).toEqual(shops.sort((a, b) => a.vnum - b.vnum))
   })
 

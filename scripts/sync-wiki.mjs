@@ -1,92 +1,112 @@
-import { mkdir, readFile, rm } from 'node:fs/promises'
-import { join } from 'node:path'
-import {
-  validateItems,
-  validateShops,
-  validateReferences,
-  applyShopOverrides,
-} from '../src/domain/catalog.mjs'
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
+import { resolve, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { readCachedExport, saveJson } from './lib/wiki-export.mjs'
+import { buildWikiImport } from './lib/wiki-import.mjs'
+import { readPrevious, preparePublication } from './lib/wiki-publication.mjs'
 import { recoverDataset, replaceDataset } from './lib/dataset-transaction.mjs'
 
-const base = (process.env.VENOR_WIKI_URL || 'https://wiki.venor2.hu').replace(/\/$/, '')
-const dataDir = join(process.cwd(), 'public', 'data')
-const lock = join(process.cwd(), '.venor-sync-lock')
-const delay = Math.max(10_000, Number(process.env.VENOR_SYNC_DELAY_MS) || 10_000)
-const dryRun = process.argv.includes('--dry-run')
-const allowShrink = process.argv.includes('--allow-shrink')
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-async function fetchJson(path) {
-  let error
-  for (let attempt = 0; attempt < 4; attempt++) {
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)))
+process.chdir(root)
+const argv = process.argv.slice(2)
+const captureIndex = argv.indexOf('--capture')
+const capturePath = captureIndex < 0 ? undefined : argv[captureIndex + 1]
+if (captureIndex >= 0) argv.splice(captureIndex, capturePath && !capturePath.startsWith('--') ? 2 : 1)
+const args = new Set(argv)
+const allowed = ['--dry-run', '--offline', '--allow-shrink', '--status', '--help']
+const cache = join(root, '.cache', 'wiki-sync')
+const publicDir = join(root, 'public')
+const lock = join(root, '.venor-sync-lock')
+let locked = false
+
+async function acquireLock() {
+  try {
+    await mkdir(lock)
+  } catch (error) {
+    if (error.code !== 'EEXIST') throw error
+    let owner
     try {
-      console.log(`Adatlekérés: ${path}`)
-      const response = await fetch(`${base}${path}`, { signal: AbortSignal.timeout(30_000) })
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
-      return await response.json()
-    } catch (caught) {
-      error = caught
-      if (attempt < 3) await wait(delay * (attempt + 1))
+      owner = JSON.parse(await readFile(join(lock, 'owner.json'), 'utf8'))
+    } catch (error) {
+      if (Date.now() - (await stat(lock)).mtimeMs < 60000)
+        throw new Error('Another sync may be starting', { cause: error })
+    }
+    if (Number.isSafeInteger(owner?.pid) && owner.pid > 0) {
+      try {
+        process.kill(owner.pid, 0)
+        throw new Error(`Sync already running (PID ${owner.pid})`, { cause: error })
+      } catch (error) {
+        if (error.code !== 'ESRCH') throw error
+      }
+    }
+    // The resolved lock is always the named folder inside this repository.
+    await rm(lock, { recursive: true, force: true })
+    await mkdir(lock)
+  }
+  locked = true
+  await writeFile(
+    join(lock, 'owner.json'),
+    JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }),
+  )
+}
+
+try {
+  for (const arg of args) if (!allowed.includes(arg)) throw new Error(`Unknown option: ${arg}`)
+  if (captureIndex >= 0 && (!capturePath || capturePath.startsWith('--')))
+    throw new Error('--capture requires an exported JSON file path')
+  if (capturePath && args.has('--offline')) throw new Error('Use --capture or --offline, not both')
+  if (args.has('--help') || (!capturePath && !args.has('--offline') && !args.has('--status'))) {
+    console.log(
+      'Sync is offline only. Load tools/wiki-browser-extension in your normal browser and export the wiki.\nThen: npm run sync-data -- --capture <export.json> [--dry-run] [--allow-shrink]\n--offline uses a complete cached export. --status shows the last local capture.\nInstructions: docs/WIKI-CAPTURE.md',
+    )
+  } else if (args.has('--status')) {
+    const snapshot = JSON.parse(await readFile(join(cache, 'capture.json'), 'utf8'))
+    console.log(
+      JSON.stringify(
+        {
+          startedAt: snapshot.startedAt,
+          complete: snapshot.complete || false,
+          published: snapshot.published || false,
+          pets: snapshot.pets?.records.length || 0,
+          shops: Object.values(snapshot.shops || {}).filter((s) => s.complete).length,
+          expectedShops: snapshot.directory?.length,
+          error: snapshot.error,
+        },
+        null,
+        2,
+      ),
+    )
+  } else {
+    await acquireLock()
+    await mkdir(cache, { recursive: true })
+    const snapshot = capturePath
+      ? JSON.parse(await readFile(resolve(capturePath), 'utf8'))
+      : await readCachedExport(cache)
+    // Recover interrupted publication before reading any candidate baseline.
+    await recoverDataset(publicDir)
+    const previous = await readPrevious(publicDir)
+    const candidate = buildWikiImport(snapshot, previous, { allowShrink: args.has('--allow-shrink') })
+    const files = await preparePublication(candidate, previous, publicDir, snapshot.images)
+    await saveJson(join(cache, 'capture.json'), snapshot)
+    await saveJson(join(cache, 'report.json'), candidate.report)
+    console.log(JSON.stringify(candidate.report, null, 2))
+    if (args.has('--dry-run'))
+      console.log(
+        'Validated. Public data unchanged; the next run can publish this cached capture without revisiting the wiki.',
+      )
+    else {
+      await saveJson(join(cache, 'previous-overrides.json'), {
+        items: previous.itemOverrides,
+        shops: previous.shopOverrides,
+      })
+      await replaceDataset(publicDir, files)
+      snapshot.published = true
+      await saveJson(join(cache, 'capture.json'), snapshot)
+      console.log('Published shops, pets, referenced items and icons together.')
     }
   }
-  throw error
-}
-let locked = false
-try {
-  await mkdir(lock)
-  locked = true
-  await recoverDataset(dataDir)
-  const items = validateItems(await fetchJson('/api/items?locale=hu'))
-  await wait(delay)
-  const shops = validateShops(await fetchJson('/api/shops?locale=hu'))
-  const pets = items.filter((item) => item.type === 'ITEM_COSTUME' && item.sub_type === 'COSTUME_PET')
-  if (!pets.length) throw new Error('Nincsenek kisállatok az új csomagban.')
-  let previous
-  try {
-    previous = JSON.parse(await readFile(join(dataDir, 'meta.json'), 'utf8'))
-  } catch {
-    /* first sync */
-  }
-  const counts = { itemCount: items.length, petCount: pets.length, shopCount: shops.length }
-  for (const [key, count] of Object.entries(counts)) {
-    if (!allowShrink && previous?.[key] && count < previous[key] * 0.9)
-      throw new Error(`${key}: több mint 10% csökkenés. Ellenőrzés után használd a --allow-shrink kapcsolót.`)
-  }
-  // Validate the effective catalog too: future wiki changes must not silently
-  // collide with preserved manual overrides.
-  const itemOverrides = validateItems(
-    JSON.parse(await readFile(join(dataDir, 'item-overrides.json'), 'utf8')),
-    true,
-  )
-  const shopOverrides = validateShops(
-    JSON.parse(await readFile(join(dataDir, 'shop-overrides.json'), 'utf8')),
-    true,
-  )
-  const effectiveItems = new Map([...items, ...itemOverrides].map((item) => [item.vnum, item]))
-  const effectiveShops = validateShops(applyShopOverrides(shops, shopOverrides))
-  const missing = validateReferences([...effectiveItems.values()], effectiveShops)
-  if (missing.length)
-    console.warn(`${missing.length} hivatkozott tárgy hiányzik a wikiből (VNUM helyettesítés).`)
-  const meta = {
-    source: `${base}/`,
-    generatedAt: new Date().toISOString(),
-    completeItems: true,
-    completePets: true,
-    ...counts,
-  }
-  console.log(JSON.stringify({ previous, next: meta, missingReferences: missing }, null, 2))
-  if (!dryRun) await replaceDataset(dataDir, { 'items.json': items, 'shops.json': shops, 'meta.json': meta })
-  console.log(
-    dryRun
-      ? 'Ellenőrzés kész; fájlok nem változtak.'
-      : 'Adatcsomag publikálva. Kézi javítások és médiafájlok megőrizve.',
-  )
 } catch (error) {
-  console.error(`Szinkronizálási hiba: ${error.message}`)
-  console.error(
-    locked
-      ? 'A korábbi csomag megmaradt vagy visszaállítható. Újraindításkor automatikus helyreállítás fut.'
-      : 'Másik szinkronizálás futhat. Összeomlás után, ha biztosan nem fut folyamat, töröld a .venor-sync-lock mappát.',
-  )
+  console.error(`Wiki sync stopped: ${error.message}`)
   process.exitCode = 1
 } finally {
   if (locked) await rm(lock, { recursive: true, force: true })

@@ -26,7 +26,7 @@ export function validateItems(items, allowEmpty = false) {
 }
 export function validateShops(shops, allowEmpty = false) {
   if (!Array.isArray(shops) || (!allowEmpty && !shops.length)) fail('üres boltlista')
-  unique(shops, 'boltok', -1) // The wiki uses -1 for the synthetic Gaya market.
+  unique(shops, 'boltok')
   for (const shop of shops) {
     if (
       !integer(shop.npc_vnum, 1) ||

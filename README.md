@@ -60,38 +60,17 @@ Az ármezők értik a `k`, `kk`, `kkk`, `kkkk`, `m`, `mrd` és `b` rövidítést
 
 ## Wiki-adatok karbantartása
 
-Először csak ellenőrizd a változásokat:
+A gyűjtés a saját, normál Chrome-böngésződ megnyitott wiki lapján fut. A `tools/wiki-browser-extension` mappát töltsd be a `chrome://extensions` oldalon (**Fejlesztői mód → Kicsomagolt bővítmény betöltése**). Nyisd meg a wiki kisállat-kategóriáját, majd kattints a bővítményre és a **Start / resume** gombra. Ezután önállóan feldolgozza az összes kisállatot és NPC-receptet, és JSON-fájlt exportál.
 
 ```bash
-npm run sync-data -- --dry-run
-```
-
-Frissítés:
-
-```bash
-npm run sync-data
+npm run sync-data -- --capture "<letöltött JSON elérési útja>" --dry-run
+npm run sync-data -- --offline
 npm run validate-data
 ```
 
-A szinkronizáló:
+A szinkronizáló parancs kizárólag helyi fájlt importál: nem indít böngészőt, és nem küld hálózati kérést. A bővítmény az oldal elemeit és tooltipjeit olvassa, közvetlen API-hívás nélkül. Minden recept után ment, hiba esetén újrapróbálkozás nélkül leáll. A hiányos export nem írhatja felül a katalógust.
 
-1. Helyreállítja az esetleg félbeszakadt csomagcserét.
-2. Legalább 10 másodperces szünettel lekéri a tárgyakat és boltokat. Kérésenként 30 másodperces időkorlát és legfeljebb négy próbálkozás van.
-3. Ellenőrzi a sémát, egész számokat, azonosítókat, árakat és kisállatok jelenlétét.
-4. Tíz százaléknál nagyobb elemszámcsökkenésnél megáll. Kézi ellenőrzés után a `--allow-shrink` kapcsoló engedélyezi.
-5. Az új csomagot külön mappába készíti el. A régi csomag biztonsági másolata megmarad a publikálásig; sikertelen csere esetén visszaállítja.
-
-A frissítés **nem kér le médiafájlokat**, és megőrzi a kézi javításokat (`item-overrides.json`, `shop-overrides.json`). Egy boltban a javítás az azonos eredménytárgyhoz tartozó wiki-ajánlatokat helyettesíti. Más tárgy ajánlatsorrendjével ütköző javítás érvénytelen csomagot jelent, nem csendes törlést.
-
-A `VENOR_SYNC_DELAY_MS` növeli a kérések közti szünetet. A `VENOR_WIKI_URL` alternatív forrást adhat meg. Egyszerre csak egy szinkronizálás futhat. Folyamatösszeomlás után, **ha biztosan nem fut másik szinkronizálás**, törölhető a `.venor-sync-lock` mappa, majd a parancs újrafuttatható. Ne töröld kézzel a `public/data.backup` helyreállítási mappát.
-
-Helyi ikonleképezések újraépítése:
-
-```bash
-npm run rebuild-icon-map
-```
-
-Ez csak helyi fájlokat olvas. Új ikonok beszerzése külön, kézi feladat.
+Telepítés, folytatás, adatösszevonás és korlátok: [docs/WIKI-CAPTURE.md](docs/WIKI-CAPTURE.md). A 2026-09-10-i teljes böngészős export sikeresen frissítette a helyi katalógust: 37 NPC-bolt, 870 recept és 70 kisállat.
 
 ## Fejlesztés
 
@@ -104,6 +83,6 @@ npm test               # Meglévő Vitest egységtesztek
 npm run check          # Ellenőrzések + egységtesztek + build
 ```
 
-A pull requestek ellenőrzést kapnak; a `main` ágra pusholt, sikeresen ellenőrzött build a GitHub Pages-re kerül. Böngészős tesztkeretrendszer nincs a projektben; a felület ellenőrzése kézi.
+A pull requestek ellenőrzést kapnak; a `main` ágra pusholt, sikeresen ellenőrzött build a GitHub Pages-re kerül. A bővítmény külön offline böngészős tesztje: `npm run test:wiki-extension`. A felület ellenőrzése kézi.
 
 A kódszerkezet és a kézi ellenőrzőlista: [docs/MAINTENANCE.md](docs/MAINTENANCE.md).

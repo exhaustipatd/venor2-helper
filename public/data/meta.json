@@ -1,9 +1,16 @@
 {
   "source": "https://wiki.venor2.hu/",
-  "generatedAt": "2026-09-03T19:34:16.440Z",
+  "generatedAt": "2026-09-10T17:01:27.596Z",
   "completeItems": true,
   "completePets": true,
-  "itemCount": 2636,
-  "petCount": 62,
-  "shopCount": 35
+  "itemCount": 2674,
+  "petCount": 70,
+  "shopCount": 37,
+  "completeShops": true,
+  "itemsGeneratedAt": "2026-09-03T19:34:16.440Z",
+  "shopsGeneratedAt": "2026-09-10T17:01:27.596Z",
+  "petsGeneratedAt": "2026-09-10T16:57:02.030Z",
+  "wikiNpcCount": 37,
+  "wikiOfferCount": 870,
+  "syncMethod": "browser-extension-dom"
 }

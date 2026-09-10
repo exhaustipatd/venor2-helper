@@ -8,5 +8,6 @@ dist/
 !.env.example
 .DS_Store
 .venor-sync-lock/
-public/data.backup/
-public/data.next/
+public.backup/
+public.next/
+public.publication.json

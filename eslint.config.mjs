@@ -13,7 +13,7 @@ export default ts.config(
     rules: { 'no-undef': 'off' }, // vue-tsc checks TypeScript and DOM names.
   },
   {
-    files: ['**/*.{ts,vue,mjs}'],
+    files: ['**/*.{ts,vue,mjs}', 'tools/wiki-browser-extension/*.js'],
     languageOptions: {
       globals: {
         window: 'readonly',

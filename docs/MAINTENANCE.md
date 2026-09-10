@@ -2,7 +2,7 @@
 
 ## Boundaries
 
-- `src/domain/catalog.mjs`: shared runtime validation used by the application and Node maintenance scripts; `catalog.d.mts` provides its TypeScript contract. The wiki's synthetic Gaya shop uses ID `-1`.
+- `src/domain/catalog.mjs`: shared runtime validation used by the application and Node maintenance scripts; `catalog.d.mts` provides its TypeScript contract.
 - `src/domain/userData.ts`: strict backup migration, game-price parsing, size limits, freshness policy.
 - `src/utils/cost.ts`: pure acquisition estimates, immutable cycle-free provenance, and batch planning. Keep all money as `bigint` in memory and decimal strings in user saves.
 - `src/stores/data.ts`: fetch a complete candidate snapshot, validate it, then publish together. Failed refreshes retain the previous snapshot. Icon failures are nonfatal and have a visible warning.
@@ -23,17 +23,17 @@ The planner executes a chosen provenance tree, rounds every NPC operation to who
 
 ## Data updates
 
-The targeted lightning event update on 2026-09-07 adds NPC 60035 (wiki shop 618), all 57 offers and the Kék Láng, Bambusz and Diana pets through overrides. Exchange prices come from the locally cached Hungarian wiki shops response; all 57 outputs and quantities match the user-saved merchant HTML. Icons come from that saved page and three static image downloads resolved through one icon-manifest request. Base snapshot metadata remains unchanged because this was not a full wiki refresh.
+The browser extension export and offline importer are the only sync workflow. The complete 2026-09-10 import contains 37 NPC shops, 870 recipes and 70 pets. Icon maps and images are updated by the importer together with the catalog.
 
 The preserved summer NPC 60319 uses local shop ID 1000618: its former manually assigned ID 618 now belongs to the wiki lightning shop. Do not reuse this local ID for wiki shops. Override NPC identity must match the base shop; a collision blocks validation instead of mixing unrelated offers.
 
 1. Work on a branch with existing user/data changes understood.
-2. Run a dry-run sync and review count changes.
-3. Run the real sync. Review JSON diffs, especially removed offers and override interactions.
-4. Run `npm run validate-data`. Missing references or icons block release; obtain missing icons manually and rebuild the map as necessary.
+2. Export using `tools/wiki-browser-extension` in your normal browser, then run `npm run sync-data -- --capture <file.json>` to import offline. No direct API calls are made. See [WIKI-CAPTURE.md](WIKI-CAPTURE.md) for checkpoints, offline validation and resuming interrupted captures.
+3. Review the resulting JSON diffs and `.cache/wiki-sync/report.json`. The importer uses one local shop per NPC because the rendered UI aggregates tabs. It absorbs overrides for refreshed records so stale overrides cannot mask the new data; overrides outside the captured scope remain.
+4. Run `npm run validate-data`. Missing references or icons block publication. Icons come from displayed images exported through canvas.
 5. Run `npm run check` before opening a PR.
 
-The sync lock prevents concurrent publishers. Directory promotion is recoverable but is not a distributed transaction or an fsync-based guarantee against hardware failure. Do not publish `data.next` or `data.backup`; a normal successful run removes them. Public hosting deployments should use the completed GitHub Pages artifact.
+The sync lock prevents concurrent publishers. Data, icon maps and images are staged through `public.next` and `public.backup`. If Windows prevents directory renaming, a file replacement fallback uses `public.publication.json` to recover interrupted writes from the backup. File promotion can briefly expose mixed versions to local readers. This is not an fsync-based guarantee against hardware failure; do not publish or discard recovery files manually. Public hosting deployments should use the completed GitHub Pages artifact.
 
 ## Manual UI checklist
 
@@ -52,4 +52,4 @@ The sync lock prevents concurrent publishers. Directory promotion is recoverable
 - Block a dataset request: initial load has Retry; a failed refresh keeps old data. Block only icons: calculations remain available with a warning.
 - Deny localStorage writes: the save error must remain visible, with export available.
 
-No browser automation dependency is required.
+Only offline extension tests require Playwright and Chromium; `npm run setup-test-browser` installs the test engine. `npm run test:wiki-extension` tests the actual collector and offline import with all requests mocked. It never contacts the wiki.
