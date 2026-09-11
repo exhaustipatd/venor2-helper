@@ -1,5 +1,5 @@
 .offer-card {
-  padding: 20px;
+  padding: 16px;
   border: 1px solid var(--line-soft);
   border-radius: 12px;
   background: var(--panel);
@@ -19,7 +19,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 14px;
 }
 .offer-metrics > div > span {
   font-size: 11px;
@@ -27,10 +27,10 @@
 }
 .offer-metrics strong {
   display: block;
-  font-size: 19px;
+  font-size: 17px;
 }
 .offer-metrics strong .currency-amount {
-  font-size: 19px;
+  font-size: 17px;
 }
 .offer-warning {
   color: var(--amber);
@@ -45,16 +45,20 @@
     grid-template-columns: 1fr;
   }
 }
-.offer-card--editable {
-  padding: 16px;
+
+.offer-card {
+  min-width: 0;
 }
-.offer-card--editable .offer-metrics {
+.offer-market-price {
+  flex: 0 1 210px;
+}
+.offer-ingredients {
+  border-top: 1px solid var(--line-soft);
   margin-top: 14px;
+  padding-top: 14px;
 }
-.offer-card--editable .offer-metrics strong,
-.offer-card--editable .offer-metrics strong .currency-amount {
-  font-size: 17px;
-}
-.offer-card--editable .detail-disclosure {
+.offer-compare-link {
+  display: block;
   margin-top: 14px;
+  font-size: 11px;
 }

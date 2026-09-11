@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import type { ShopOffer, ShopTab } from '@/types/domain'
 import { useMarketStore } from '@/stores/market'
 import { useDataStore } from '@/stores/data'
@@ -7,29 +7,41 @@ import { useUserStore } from '@/stores/user'
 import { offerKey, currencyName } from '@/utils/cost'
 import { formatInteger, itemName } from '@/utils/format'
 import ItemIcon from './ItemIcon.vue'
-import RecipeRows from './RecipeRows.vue'
 import CurrencyAmount from './CurrencyAmount.vue'
 import PriceInput from './PriceInput.vue'
 import AcquisitionIngredients from './AcquisitionIngredients.vue'
-const props = defineProps<{ offer: ShopOffer; shop: ShopTab; featured?: boolean; editable?: boolean }>()
+const props = defineProps<{
+  offer: ShopOffer
+  shop: ShopTab
+  featured?: boolean
+  npcHeading?: boolean
+  hideItemPrice?: boolean
+}>()
 const market = useMarketStore(),
   data = useDataStore(),
-  user = useUserStore(),
-  open = ref(false)
+  user = useUserStore()
 const entry = computed(() => market.byKey.get(offerKey(props.shop, props.offer)))
 </script>
 <template>
-  <article class="offer-card" :class="{ featured: featured && !!entry, 'offer-card--editable': editable }">
+  <article class="offer-card" :class="{ featured: featured && !!entry }">
     <header>
       <div class="item-identity">
         <ItemIcon :vnum="offer.item_vnum" :size="44" />
         <div>
-          <strong>{{ editable ? shop.npc_name : itemName(data.getItem(offer.item_vnum)) }}</strong
+          <strong>{{ npcHeading ? shop.npc_name : itemName(data.getItem(offer.item_vnum)) }}</strong
           ><small
-            >{{ editable ? `${offer.order}. ajánlat` : shop.npc_name }} · ×{{ offer.count }} / váltás</small
+            >{{ npcHeading ? `${offer.order}. ajánlat` : shop.npc_name }} · ×{{ offer.count }} / váltás</small
           >
         </div>
       </div>
+      <PriceInput
+        v-if="!hideItemPrice"
+        class="offer-market-price"
+        compact
+        :label="`${itemName(data.getItem(offer.item_vnum))} piaci ára / db`"
+        :model-value="user.priceFor(offer.item_vnum).marketPrice"
+        @update:model-value="user.updatePrice(offer.item_vnum, $event)"
+      />
       <span v-if="featured" class="badge badge--gold">KIEMELT ÚTVONAL</span>
     </header>
     <p v-if="!entry" class="offer-warning">Inaktív NPC · Ez a váltás nem szerepel a számításokban.</p>
@@ -52,27 +64,13 @@ const entry = computed(() => market.byKey.get(offerKey(props.shop, props.offer))
         >{{ formatInteger(amount) }} {{ currencyName(type) }}: nincs Yang-árfolyam.
       </template>
     </p>
-    <AcquisitionIngredients
-      v-if="editable"
-      class="detail-disclosure"
-      :offer="offer"
-      :sources="entry?.source?.ingredients"
-    />
-    <details v-else class="detail-disclosure" @toggle="open = ($event.target as HTMLDetailsElement).open">
-      <summary>Recept és árak szerkesztése</summary>
-      <div v-if="open" class="stack">
-        <RecipeRows :offer="offer" :sources="entry?.source?.ingredients" /><PriceInput
-          :label="`${itemName(data.getItem(offer.item_vnum))} piaci ára`"
-          :model-value="user.priceFor(offer.item_vnum).marketPrice"
-          @update:model-value="user.updatePrice(offer.item_vnum, $event)"
-        /><RouterLink
-          v-if="entry"
-          class="text-link"
-          :to="{ path: '/osszehasonlitas', query: { item: offer.item_vnum } }"
-          >Összehasonlítás és mennyiségtervezés →</RouterLink
-        >
-      </div>
-    </details>
+    <AcquisitionIngredients class="offer-ingredients" :offer="offer" :sources="entry?.source?.ingredients" />
+    <RouterLink
+      v-if="!hideItemPrice && entry"
+      class="text-link offer-compare-link"
+      :to="{ path: '/osszehasonlitas', query: { item: offer.item_vnum } }"
+      >Összehasonlítás és mennyiségtervezés →</RouterLink
+    >
   </article>
 </template>
 <style scoped src="./OfferCard.css"></style>

@@ -52,7 +52,7 @@ const tabs = computed(
       </div>
       <span class="badge"><Store :size="14" /> {{ data.npcs.length }} NPC</span>
     </header>
-    <div class="split-layout" :class="{ 'has-selection': !!selection && !!selected }">
+    <div class="split-layout shops-layout" :class="{ 'has-selection': !!selection && !!selected }">
       <aside class="browser-sidebar">
         <label class="search-field"
           ><Search :size="16" /><input

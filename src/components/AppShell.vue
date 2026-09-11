@@ -85,7 +85,7 @@ const progress = computed(() =>
       <main
         id="main-content"
         class="content-wrap"
-        :class="{ 'content-wrap--wide': route.name === 'compare' }"
+        :class="{ 'content-wrap--wide': ['compare', 'shops', 'pets'].includes(String(route.name)) }"
         tabindex="-1"
       >
         <slot />

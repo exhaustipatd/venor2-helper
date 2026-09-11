@@ -9,7 +9,7 @@
 - `src/stores/user.ts`: persistence, exports, explicit restore/reset, collection ownership, targets and per-NPC availability. Read v4 first, then v3, then v2 only when newer keys do not exist. Never silently fall back to an older save when the current one is corrupt. Unspecified NPCs are active except wind NPC 60033.
 - `src/stores/market.ts`: one shared computed acquisition index, offer summaries, downstream usages, and missing-price priorities, all derived from active shops only. Inactive NPC recipes remain browsable but must never enter provenance trees or planner routes. Views must not implement their own profit/cost arithmetic.
 - `src/composables/useQueryState.ts`: URL-backed filters. Update multiple query fields in one router call, preserving unrelated fields.
-- `src/components/`: common currency, price status, input, import preview, recipe rows/tree, offer cards, quantity planner, modal detail panel and navigation.
+- `src/components/`: common currency, price status, input, import preview, compact acquisition ingredients, offer cards, quantity planner, modal detail panel and navigation.
 - `src/styles/colors.css`: dark/light semantic color tokens. `common.css`: typography, focus, responsive layout and shared primitives. Page-specific CSS stays beside its view.
 - `scripts/lib/dataset-transaction.mjs`: staging, backup, promotion, rollback and interrupted-publication recovery. Do not return to unlink-before-rename writes.
 
@@ -44,7 +44,8 @@ The sync lock prevents concurrent publishers. Data, icon maps and images are sta
 - Import game prices: inspect new/replaced/skipped counts, cancel without changes, then confirm. Existing unrelated prices and collection entries remain.
 - Restore a backup: the replace warning and unchecked confirmation must appear before mutation. Export the current state first. Repeat with malformed JSON.
 - Mark a pet owned, pin a target, filter the gallery and reload. Ownership and targets persist independently.
-- Open and close detail panels with keyboard only. Escape closes; Tab stays inside; focus returns to the opener. On mobile, repeat for navigation.
+- Flip a pet card in place, edit ingredients without disclosures, then flip it back with keyboard focus restored. Gallery filters, card size and page scroll stay in place. Direct pet links must open the ingredient face of the matching card. Long recipes scroll inside the card while its back button remains visible. The bonus summary starts closed and updates when ownership changes.
+- Open and close import/settings detail panels with keyboard only. Escape closes; Tab stays inside; focus returns to the opener. On mobile, repeat for navigation.
 - Compare a chain with a multi-item output. Unit estimates and whole-batch spending must remain distinctly labelled. Inspect leftover quantities and missing currency messages.
 - Search NPCs by item name. Switch NPCs and tabs. On mobile, use the back-to-list control.
 - Check missing/stale price filters, inline saving, usage expansions, and pagination.

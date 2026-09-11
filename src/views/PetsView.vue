@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { Check, PawPrint, Search, SlidersHorizontal, Target, ArrowUpRight } from '@lucide/vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import {
+  Check,
+  PawPrint,
+  Search,
+  SlidersHorizontal,
+  Target,
+  ArrowLeft,
+  RotateCw,
+  Calculator,
+} from '@lucide/vue'
 import { useDataStore } from '@/stores/data'
 import { useUserStore } from '@/stores/user'
 import { useMarketStore } from '@/stores/market'
@@ -9,7 +19,6 @@ import { itemBonuses, bonusLabel, totalItemBonuses } from '@/utils/bonuses'
 import { itemName } from '@/utils/format'
 import { normalizeSearchText } from '@/utils/search'
 import ItemIcon from '@/components/ItemIcon.vue'
-import DetailPanel from '@/components/DetailPanel.vue'
 import CurrencyAmount from '@/components/CurrencyAmount.vue'
 import PriceInput from '@/components/PriceInput.vue'
 import PriceStatus from '@/components/PriceStatus.vue'
@@ -17,6 +26,9 @@ import OfferCard from '@/components/OfferCard.vue'
 const data = useDataStore(),
   user = useUserStore(),
   market = useMarketStore()
+const showBonuses = ref(false)
+const route = useRoute(),
+  router = useRouter()
 const search = useQueryState('q'),
   bonus = useQueryState('bonus'),
   minimum = useQueryState('min'),
@@ -58,7 +70,19 @@ const ownedPets = computed(() => data.pets.filter((pet) => user.isOwned(pet.vnum
 const owned = computed(() => ownedPets.value.length)
 const ownedBonuses = computed(() => totalItemBonuses(ownedPets.value))
 const progress = computed(() => (data.pets.length ? Math.round((owned.value / data.pets.length) * 100) : 0))
-const selected = computed(() => data.pets.find((pet) => pet.vnum === Number(selection.value)))
+const flippedId = computed(() => Number(selection.value))
+async function flipPet(id: number) {
+  await router.replace({ query: { ...route.query, pet: flippedId.value === id ? undefined : String(id) } })
+  await nextTick()
+  const face = flippedId.value === id ? '.pet-card__back' : '.pet-detail-link'
+  document.querySelector<HTMLElement>(`[data-pet-id="${id}"] ${face}`)?.focus({ preventScroll: true })
+}
+onMounted(() => {
+  if (flippedId.value)
+    requestAnimationFrame(() => {
+      document.querySelector(`[data-pet-id="${flippedId.value}"]`)?.scrollIntoView({ block: 'nearest' })
+    })
+})
 function bestPrice(id: number) {
   return market.bestCosts.get(id)?.unitCost ?? user.marketPrice(id)
 }
@@ -69,18 +93,34 @@ function bestPrice(id: number) {
       <div>
         <h1>Kisállatok</h1>
       </div>
-      <div class="collection-total">
-        <span><PawPrint :size="16" /> MEGSZEREZVE</span
-        ><strong
-          >{{ owned }} <small>/ {{ data.pets.length }}</small></strong
+      <div class="pet-heading-tools">
+        <button
+          class="button"
+          :class="{ 'button--primary': showBonuses }"
+          :aria-expanded="showBonuses"
+          aria-controls="owned-bonuses"
+          @click="showBonuses = !showBonuses"
         >
-        <div class="progress-track"><span :style="{ width: `${progress}%` }" /></div>
+          <Calculator :size="16" /> Bónuszösszesítő
+        </button>
+        <div class="collection-total">
+          <span><PawPrint :size="16" /> MEGSZEREZVE</span
+          ><strong
+            >{{ owned }} <small>/ {{ data.pets.length }}</small></strong
+          >
+          <div class="progress-track"><span :style="{ width: `${progress}%` }" /></div>
+        </div>
       </div>
     </header>
     <div v-if="!data.meta.completePets" class="notice notice--warning">
       A kisállat-adatcsomag részleges. A hiányzó adatokat az alkalmazás karbantartója frissíti.
     </div>
-    <section class="panel owned-bonuses" aria-labelledby="owned-bonuses-heading">
+    <section
+      v-if="showBonuses"
+      id="owned-bonuses"
+      class="panel owned-bonuses"
+      aria-labelledby="owned-bonuses-heading"
+    >
       <h2 id="owned-bonuses-heading">Meglévő kisállatok összes bónusza</h2>
       <dl v-if="ownedBonuses.length" class="owned-bonuses__list">
         <div v-for="entry in ownedBonuses" :key="entry.type">
@@ -126,7 +166,13 @@ function bestPrice(id: number) {
         v-for="pet in filtered"
         :key="pet.vnum"
         class="pet-card"
-        :class="{ owned: user.isOwned(pet.vnum), targeted: user.isTarget(pet.vnum) }"
+        :data-pet-id="pet.vnum"
+        :class="{
+          owned: user.isOwned(pet.vnum),
+          targeted: user.isTarget(pet.vnum),
+          'pet-card--flipped': flippedId === pet.vnum,
+        }"
+        @keydown.esc="flippedId === pet.vnum && flipPet(pet.vnum)"
       >
         <div class="pet-card__top">
           <span class="pet-number">#{{ pet.vnum }}</span
@@ -140,27 +186,62 @@ function bestPrice(id: number) {
             <Target :size="17" />
           </button>
         </div>
-        <button
-          class="pet-open"
-          :aria-label="`${itemName(pet)} részletei`"
-          @click="selection = String(pet.vnum)"
+        <section
+          v-if="flippedId === pet.vnum"
+          :id="`pet-ingredients-${pet.vnum}`"
+          class="pet-card__back"
+          tabindex="0"
+          :aria-label="`${itemName(pet)} beszerzési lehetőségei`"
         >
-          <span class="pet-stage"><span class="pet-halo" /><ItemIcon :vnum="pet.vnum" :size="78" /></span>
-          <h2>{{ itemName(pet) }}</h2>
-        </button>
-        <ul class="bonus-list">
-          <li
-            v-for="entry in itemBonuses(pet)"
-            :key="entry.type"
-            :class="{ highlighted: entry.type === bonus }"
-          >
-            <span>{{ entry.label }}</span
-            ><strong>{{ entry.display }}</strong>
-          </li>
-          <li v-if="!itemBonuses(pet).length" class="muted">Nincs megadott bónusz</li>
-        </ul>
-        <div class="pet-cost">
-          <span>Legjobb ismert ár / db</span><strong><CurrencyAmount :value="bestPrice(pet.vnum)" /></strong>
+          <div class="pet-back-overview">
+            <div class="pet-back-identity item-identity">
+              <ItemIcon :vnum="pet.vnum" :size="36" />
+              <div>
+                <h2>{{ itemName(pet) }}</h2>
+                <small>Beszerzés és alapanyagok</small>
+              </div>
+            </div>
+            <div class="pet-back-price">
+              <PriceInput
+                :label="`${itemName(pet)} piaci ára / db`"
+                :model-value="user.priceFor(pet.vnum).marketPrice"
+                @update:model-value="user.updatePrice(pet.vnum, $event)"
+              />
+              <PriceStatus :vnum="pet.vnum" />
+            </div>
+          </div>
+          <OfferCard
+            v-for="entry in market.byItem.get(pet.vnum) ?? []"
+            :key="entry.key"
+            :shop="entry.shop"
+            :offer="entry.offer"
+            npc-heading
+            hide-item-price
+          />
+          <p v-if="!market.byItem.has(pet.vnum)" class="notice">
+            Nincs ismert NPC-váltás. A piaci árat itt megadhatod.
+          </p>
+        </section>
+        <div v-else class="pet-card__front">
+          <button class="pet-open" :aria-label="`${itemName(pet)} részletei`" @click="flipPet(pet.vnum)">
+            <span class="pet-stage"><span class="pet-halo" /><ItemIcon :vnum="pet.vnum" :size="78" /></span>
+            <h2>{{ itemName(pet) }}</h2>
+          </button>
+          <ul class="bonus-list">
+            <li
+              v-for="entry in itemBonuses(pet)"
+              :key="entry.type"
+              :class="{ highlighted: entry.type === bonus }"
+            >
+              <span>{{ entry.label }}</span
+              ><strong>{{ entry.display }}</strong>
+            </li>
+            <li v-if="!itemBonuses(pet).length" class="muted">Nincs megadott bónusz</li>
+          </ul>
+          <div class="pet-cost">
+            <span>Legjobb ismert ár / db</span
+            ><strong><CurrencyAmount :value="bestPrice(pet.vnum)" /></strong>
+          </div>
         </div>
         <div class="pet-card__actions">
           <button
@@ -173,10 +254,17 @@ function bestPrice(id: number) {
             <Check :size="15" /> {{ user.isOwned(pet.vnum) ? 'Megvan' : 'Megjelölöm' }}</button
           ><button
             class="pet-detail-link"
-            :aria-label="`${itemName(pet)} beszerzése`"
-            @click="selection = String(pet.vnum)"
+            :aria-label="
+              flippedId === pet.vnum
+                ? `${itemName(pet)}: vissza a kisállathoz`
+                : `${itemName(pet)} beszerzése`
+            "
+            :aria-expanded="flippedId === pet.vnum"
+            :aria-controls="`pet-ingredients-${pet.vnum}`"
+            @click="flipPet(pet.vnum)"
           >
-            Részletek <ArrowUpRight :size="14" />
+            <ArrowLeft v-if="flippedId === pet.vnum" :size="14" /><RotateCw v-else :size="14" />
+            {{ flippedId === pet.vnum ? 'Vissza a kisállathoz' : 'Alapanyagok' }}
           </button>
         </div>
       </article>
@@ -186,60 +274,6 @@ function bestPrice(id: number) {
       <h2>Nincs ilyen kisállat</h2>
       <p>Módosítsd a szűrőket. Célokat a kártyák jobb felső sarkában jelölhetsz ki.</p>
     </section>
-    <DetailPanel
-      :open="!!selected"
-      :title="selected ? itemName(selected) : 'Kisállat'"
-      @close="selection = ''"
-      ><div v-if="selected" class="stack">
-        <div class="pet-detail-hero">
-          <ItemIcon :vnum="selected.vnum" :size="92" />
-          <div>
-            <p>#{{ selected.vnum }} · {{ user.isOwned(selected.vnum) ? 'Már megvan' : 'Még hiányzik' }}</p>
-            <div class="actions">
-              <button
-                class="button"
-                :aria-pressed="user.isOwned(selected.vnum)"
-                @click="user.toggleOwned(selected.vnum)"
-              >
-                <Check :size="16" /> {{ user.isOwned(selected.vnum) ? 'Megvan' : 'Megjelölöm' }}</button
-              ><button
-                class="button"
-                :aria-pressed="user.isTarget(selected.vnum)"
-                @click="user.toggleTarget(selected.vnum)"
-              >
-                <Target :size="16" /> {{ user.isTarget(selected.vnum) ? 'Cél törlése' : 'Célként kitűzöm' }}
-              </button>
-            </div>
-          </div>
-        </div>
-        <ul class="bonus-list">
-          <li v-for="entry in itemBonuses(selected)" :key="entry.type">
-            <span>{{ entry.label }}</span
-            ><strong>{{ entry.display }}</strong>
-          </li>
-        </ul>
-        <div class="panel stack">
-          <PriceInput
-            label="Kisállat piaci egységára"
-            :model-value="user.priceFor(selected.vnum).marketPrice"
-            @update:model-value="user.updatePrice(selected.vnum, $event)"
-          /><PriceStatus :vnum="selected.vnum" />
-        </div>
-        <h3>Beszerzési lehetőségek</h3>
-        <OfferCard
-          v-for="entry in market.byItem.get(selected.vnum) ?? []"
-          :key="entry.key"
-          :shop="entry.shop"
-          :offer="entry.offer"
-        />
-        <p v-if="!market.byItem.has(selected.vnum)" class="notice">Nincs ismert NPC-váltás.</p>
-        <RouterLink
-          v-if="market.byItem.has(selected.vnum)"
-          class="button button--primary"
-          :to="{ path: '/osszehasonlitas', query: { item: selected.vnum } }"
-          >Összehasonlítás és tervezés <ArrowUpRight :size="16"
-        /></RouterLink></div
-    ></DetailPanel>
   </div>
 </template>
 <style scoped src="./PetsView.css"></style>

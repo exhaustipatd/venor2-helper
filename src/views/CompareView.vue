@@ -144,7 +144,8 @@ const best = computed(() => (selected.value ? market.bestCosts.get(selected.valu
                 :key="entry.key"
                 :offer="entry.offer"
                 :shop="entry.shop"
-                editable
+                npc-heading
+                hide-item-price
                 :featured="
                   best?.kind === 'shop' &&
                   best.shopVnum === entry.shop.vnum &&

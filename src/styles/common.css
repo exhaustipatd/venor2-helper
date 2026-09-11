@@ -514,11 +514,6 @@ select option {
   border-top: 1px solid var(--line-soft);
   margin: 22px 0;
 }
-.detail-disclosure {
-  border-top: 1px solid var(--line-soft);
-  margin-top: 18px;
-  padding-top: 14px;
-}
 summary {
   cursor: pointer;
   font-size: 13px;

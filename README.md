@@ -5,10 +5,10 @@ Magyar nyelvű, nem hivatalos Venor2 játéksegédlet. Vue 3 + TypeScript + Pini
 ## Funkciók
 
 - **Áttekintés:** pozitív becsült eredményű cserék, hiányzó árak prioritása, gyűjtemény és célok.
-- **Cserekereső:** piaci vásárlás és körmentes, láncolt NPC-váltások; kinyitható beszerzési útvonalak.
-- **Mennyiségtervező:** egész váltási csomagok, bevásárlólista, sorrendbe rendezett lépések és megmaradó tárgyak.
-- **NPC-boltok:** keresés kereskedőre, ajánlatra és VNUM-ra; összecsukható receptek; NPC-nként mentett kapcsoló. Az inaktív NPC-k böngészhetők, de a teljes beszerzési láncból kimaradnak. A szél kereskedő alapból inaktív.
-- **Kisállatok:** egységes gyűjteménykártyák, bónuszszűrés, megszerzett állapot, kitűzött célok, részletpanel.
+- **Cserekereső:** piaci vásárlás és körmentes, láncolt NPC-váltások; kompakt, közvetlenül szerkeszthető alapanyagárak és beszerzési útvonalak.
+- **Mennyiségtervező:** egész váltási csomagok, bevásárlólista, sorrendbe rendezett lépések és megmaradó tárgyak; külön gombbal nyitható meg.
+- **NPC-boltok:** keresés kereskedőre, ajánlatra és VNUM-ra; mindig látható, kompakt receptek; NPC-nként mentett kapcsoló. Az inaktív NPC-k böngészhetők, de a teljes beszerzési láncból kimaradnak. A szél kereskedő alapból inaktív.
+- **Kisállatok:** egységes gyűjteménykártyák, bónuszszűrés, megszerzett állapot, kitűzött célok, helyben átfordítható kártyák kompakt alapanyaglistával és gombbal nyitható bónuszösszesítő.
 - **Árlista:** egységes saját árak, hét napnál régebbi árak jelzése, továbbváltások, játékbeli JSON import és export.
 - **Biztonsági mentések:** v2, v3 és v4 import, teljes csere előtti megerősítés, export, tárhelyhiba-jelzés.
 - **Obsidian & Jade:** sötét obszidián/jade/arany és világos elefántcsont téma; helyi betűk és tárgyikonok.

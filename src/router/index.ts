@@ -12,5 +12,16 @@ export const router = createRouter({
     { path: '/beallitasok', name: 'settings', component: () => import('@/views/SettingsView.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
-  scrollBehavior: () => ({ top: 0 }),
+  scrollBehavior: (to, from) => {
+    // Turning a pet card over must keep the gallery at the same scroll position.
+    if (
+      to.name === 'pets' &&
+      from.name === 'pets' &&
+      Object.keys({ ...to.query, ...from.query })
+        .filter((key) => key !== 'pet')
+        .every((key) => JSON.stringify(to.query[key]) === JSON.stringify(from.query[key]))
+    )
+      return false
+    return { top: 0 }
+  },
 })

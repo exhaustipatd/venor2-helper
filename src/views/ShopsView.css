@@ -25,8 +25,8 @@
 .merchant-header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 28px;
+  gap: 16px;
+  padding: 18px;
   border: 1px solid var(--gold-line);
   border-radius: 14px;
   background: linear-gradient(120deg, var(--gold-bg), var(--panel));
@@ -35,8 +35,8 @@
 .merchant-mark {
   display: grid;
   place-items: center;
-  width: 70px;
-  height: 76px;
+  width: 52px;
+  height: 58px;
   border: 1px solid var(--gold-line);
   border-radius: 12px 12px 25px 25px;
   color: var(--gold);
@@ -72,6 +72,8 @@
 }
 .shop-offers {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 470px), 1fr));
+  align-items: start;
   gap: 14px;
 }
 .shop-section .panel-heading h3 {
@@ -88,5 +90,27 @@
   }
   .merchant-header h2 {
     font-size: 21px;
+  }
+}
+
+.shops-layout {
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 18px;
+}
+.shops-layout .browser-content {
+  min-width: 0;
+}
+.shops-layout .browser-sidebar {
+  padding: 10px;
+}
+@media (max-width: 1050px) and (min-width: 761px) {
+  .shops-layout {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .shops-layout {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
