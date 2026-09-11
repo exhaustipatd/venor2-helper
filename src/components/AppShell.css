@@ -161,6 +161,10 @@
 .content-wrap:focus {
   outline: none;
 }
+.content-wrap--wide {
+  max-width: none;
+  padding-inline: 24px;
+}
 .app-footer {
   display: flex;
   justify-content: space-between;

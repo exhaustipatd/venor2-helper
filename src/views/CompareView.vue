@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { ArrowLeft, ArrowUpRight, Search, ArrowRightLeft, Crown, ShoppingCart } from '@lucide/vue'
+import { computed, ref } from 'vue'
+import { ArrowLeft, ArrowUpRight, Search, ArrowRightLeft, Calculator } from '@lucide/vue'
 import { useDataStore } from '@/stores/data'
 import { useUserStore } from '@/stores/user'
 import { useMarketStore } from '@/stores/market'
@@ -16,6 +16,7 @@ import QuantityPlanner from '@/components/QuantityPlanner.vue'
 const data = useDataStore(),
   user = useUserStore(),
   market = useMarketStore()
+const showPlanner = ref(false)
 const search = useQueryState('q'),
   selection = useQueryState('item')
 const groups = computed(() =>
@@ -46,13 +47,13 @@ const selected = computed(
 const best = computed(() => (selected.value ? market.bestCosts.get(selected.value.vnum) : undefined))
 </script>
 <template>
-  <div>
+  <div class="compare-page">
     <header class="page-heading">
       <div>
         <h1>Cserekereső</h1>
       </div>
     </header>
-    <div class="split-layout" :class="{ 'has-selection': !!selection && !!selected }">
+    <div class="split-layout compare-layout" :class="{ 'has-selection': !!selection && !!selected }">
       <aside class="browser-sidebar">
         <label class="search-field"
           ><Search :size="16" /><input
@@ -78,77 +79,82 @@ const best = computed(() => (selected.value ? market.bestCosts.get(selected.valu
         </div>
         <p v-if="!filtered.length" class="muted">Nincs találat. Módosítsd a keresést.</p>
       </aside>
-      <section v-if="selected" :key="selected.vnum" class="browser-content stack">
+      <section v-if="selected" :key="selected.vnum" class="browser-content compare-content">
         <div>
           <button class="button mobile-back" @click="selection = ''">
             <ArrowLeft :size="16" /> Vissza a tárgyakhoz
           </button>
           <div class="compare-identity panel">
             <div class="item-identity">
-              <ItemIcon :vnum="selected.vnum" :size="64" />
+              <ItemIcon :vnum="selected.vnum" :size="44" />
               <div>
                 <span class="overline">TÁRGY #{{ selected.vnum }}</span>
                 <h2>{{ itemName(data.getItem(selected.vnum)) }}</h2>
                 <small>{{ selected.offers.length }} NPC-váltás + játékospiac</small>
               </div>
             </div>
-            <div class="compare-market-input">
-              <PriceInput
-                label="Piaci egységár"
-                :model-value="user.priceFor(selected.vnum).marketPrice"
-                @update:model-value="user.updatePrice(selected.vnum, $event)"
-              /><PriceStatus :vnum="selected.vnum" />
+            <div class="compare-tools">
+              <div class="compare-market-input">
+                <PriceInput
+                  label="Piaci egységár"
+                  :model-value="user.priceFor(selected.vnum).marketPrice"
+                  @update:model-value="user.updatePrice(selected.vnum, $event)"
+                /><PriceStatus :vnum="selected.vnum" />
+              </div>
+              <button
+                class="button"
+                :class="{ 'button--primary': showPlanner }"
+                :aria-expanded="showPlanner"
+                aria-controls="compare-planner"
+                @click="showPlanner = !showPlanner"
+              >
+                <Calculator :size="16" /> Mennyiségtervező
+              </button>
             </div>
           </div>
         </div>
-        <section v-if="best" class="best-route-banner">
-          <div class="best-route-icon"><Crown :size="25" /></div>
+        <div class="compare-summary">
           <div>
-            <span class="eyebrow">LEGJOBB ISMERT EGYSÉGÁR</span>
-            <h3>{{ best.kind === 'market' ? 'Játékospiac' : best.npcName }}</h3>
+            <span>Legjobb ismert beszerzés / db</span>
+            <strong><CurrencyAmount :value="best?.unitCost" /></strong>
+            <small>{{
+              best ? (best.kind === 'market' ? 'Játékospiac' : best.npcName) : 'Add meg az alapanyagárakat'
+            }}</small>
           </div>
-          <strong><CurrencyAmount :value="best.unitCost" /><small>becslés / db</small></strong>
-        </section>
-        <div class="metrics">
-          <article class="metric">
-            <span>Legolcsóbb NPC-váltás / db</span
-            ><strong><CurrencyAmount :value="selected.offers[0]?.cost.unitCost" /></strong
-            ><small>egységár-becslés</small>
-          </article>
-          <article class="metric">
-            <span>Saját piaci ár / db</span
-            ><strong><CurrencyAmount :value="user.marketPrice(selected.vnum)" /></strong
-            ><small>vételhez és eladáshoz is</small>
-          </article>
-          <article class="metric">
-            <span>Legjobb váltási profit / db</span
-            ><strong><CurrencyAmount :value="selected.profit" signed /></strong
-            ><small>nem garantált eladási eredmény</small>
-          </article>
-        </div>
-        <QuantityPlanner :vnum="selected.vnum" />
-        <div class="panel-heading route-heading">
           <div>
-            <h2>Beszerzési lehetőségek</h2>
+            <span>Legolcsóbb NPC-váltás / db</span>
+            <strong><CurrencyAmount :value="selected.offers[0]?.cost.unitCost" /></strong>
+            <small>Egységár-becslés</small>
           </div>
-          <span class="badge">Költség / db szerint</span>
+          <div>
+            <span>Legjobb váltási profit / db</span>
+            <strong><CurrencyAmount :value="selected.profit" signed /></strong>
+            <small>Becslés a saját piaci ár alapján</small>
+          </div>
         </div>
-        <div class="market-route">
-          <ShoppingCart :size="20" />
-          <div><strong>Játékospiac</strong><small>Nincs váltási csomag · saját egységár</small></div>
-          <CurrencyAmount :value="user.marketPrice(selected.vnum)" />
+        <div class="compare-workspace" :class="{ 'compare-workspace--planning': showPlanner }">
+          <section class="compare-offers">
+            <div class="panel-heading route-heading">
+              <h2>Cserék és alapanyagárak</h2>
+              <span class="badge">Költség / db szerint</span>
+            </div>
+            <div class="compare-offer-grid">
+              <OfferCard
+                v-for="entry in selected.offers"
+                :key="entry.key"
+                :offer="entry.offer"
+                :shop="entry.shop"
+                editable
+                :featured="
+                  best?.kind === 'shop' &&
+                  best.shopVnum === entry.shop.vnum &&
+                  best.offer?.order === entry.offer.order
+                "
+              />
+            </div>
+          </section>
+          <QuantityPlanner v-if="showPlanner" id="compare-planner" :vnum="selected.vnum" />
         </div>
-        <OfferCard
-          v-for="entry in selected.offers"
-          :key="entry.key"
-          :offer="entry.offer"
-          :shop="entry.shop"
-          :featured="
-            best?.kind === 'shop' &&
-            best.shopVnum === entry.shop.vnum &&
-            best.offer?.order === entry.offer.order
-          "
-        />
         <RouterLink class="text-link" to="/arlista"
           >Az összes saját ár szerkesztése <ArrowUpRight :size="13"
         /></RouterLink>

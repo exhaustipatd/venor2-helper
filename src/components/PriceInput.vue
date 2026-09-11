@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, useId, watch } from 'vue'
 import { formatInteger, normalizePrice, parsePrice } from '@/utils/format'
-const props = withDefaults(defineProps<{ modelValue: string; label?: string; compact?: boolean }>(), {
-  label: 'Piaci ár',
-  compact: false,
-})
+const props = withDefaults(
+  defineProps<{ modelValue: string; label?: string; compact?: boolean; hideLabel?: boolean }>(),
+  {
+    label: 'Piaci ár',
+    compact: false,
+    hideLabel: false,
+  },
+)
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const editing = ref(false),
   localValue = ref(props.modelValue),
@@ -35,7 +39,7 @@ function cancel(event: KeyboardEvent) {
 </script>
 <template>
   <div class="price-input" :class="{ 'price-input--compact': compact }">
-    <label :for="id">{{ label }}</label>
+    <label :for="id" :class="{ 'sr-only': hideLabel }">{{ label }}</label>
     <div class="price-input__control">
       <input
         :id="id"

@@ -82,7 +82,14 @@ const progress = computed(() =>
         <span><span class="status-dot" /> VENOR2 <i>/</i> NEM HIVATALOS JÁTÉKSEGÉDLET</span
         ><span><ShieldCheck :size="14" /> Helyben tárolva · fiók nélkül</span>
       </div>
-      <main id="main-content" class="content-wrap" tabindex="-1"><slot /></main>
+      <main
+        id="main-content"
+        class="content-wrap"
+        :class="{ 'content-wrap--wide': route.name === 'compare' }"
+        tabindex="-1"
+      >
+        <slot />
+      </main>
       <footer class="app-footer">
         <span>Wiki-adatok és saját árak; nem élő piaci adatok.</span>
       </footer>

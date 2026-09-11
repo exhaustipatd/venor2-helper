@@ -45,3 +45,16 @@
     grid-template-columns: 1fr;
   }
 }
+.offer-card--editable {
+  padding: 16px;
+}
+.offer-card--editable .offer-metrics {
+  margin-top: 14px;
+}
+.offer-card--editable .offer-metrics strong,
+.offer-card--editable .offer-metrics strong .currency-amount {
+  font-size: 17px;
+}
+.offer-card--editable .detail-disclosure {
+  margin-top: 14px;
+}

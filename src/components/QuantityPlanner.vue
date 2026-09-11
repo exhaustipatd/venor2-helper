@@ -108,8 +108,11 @@ const profit = computed(() =>
         Becsült eredmény {{ quantity }} db eladásakor: <CurrencyAmount :value="profit" signed />. A maradékot
         nem számítjuk eladásnak.
       </p>
-      <details>
-        <summary>Bevásárlólista és lépések</summary>
+      <div class="planner-breakdown">
+        <h3>Bevásárlólista</h3>
+        <p v-if="!selected.plan.purchases.size" class="planner-description">
+          Nincs piaci vásárlás ezen az útvonalon.
+        </p>
         <div class="plan-lines">
           <div v-for="[id, purchase] in selected.plan.purchases" :key="id">
             <ShoppingBasket :size="14" /><span
@@ -122,6 +125,9 @@ const profit = computed(() =>
               @update:model-value="user.updatePrice(id, $event)"
             />
           </div>
+        </div>
+        <h3 v-if="selected.plan.exchanges.length">Lépések sorrendben</h3>
+        <div class="plan-lines">
           <div v-for="(exchange, index) in selected.plan.exchanges" :key="index">
             <ArrowRightLeft :size="14" /><span
               >{{ exchange.source.npcName }} → {{ itemName(data.getItem(exchange.source.vnum!)) }}</span
@@ -132,7 +138,7 @@ const profit = computed(() =>
         <div v-for="[id, count] in selected.plan.leftovers" :key="id" class="leftover-line">
           {{ itemName(data.getItem(id)) }} <strong>×{{ formatInteger(count) }}</strong>
         </div>
-      </details>
+      </div>
     </div>
     <p v-else-if="valid" class="notice notice--warning">
       Ehhez az útvonalhoz még nincs teljes, körmentes Yang-költség. Add meg a hiányzó árakat, vagy válassz
@@ -145,6 +151,20 @@ const profit = computed(() =>
   </section>
 </template>
 <style scoped>
+.quantity-planner {
+  min-width: 0;
+  container-type: inline-size;
+}
+.quantity-planner.panel {
+  padding: 18px;
+}
+.quantity-planner .panel-heading {
+  margin-bottom: 10px;
+}
+.planner-breakdown h3 {
+  font-size: 13px;
+  margin: 20px 0 8px;
+}
 .planner-description {
   font-size: 12px;
 }
@@ -171,7 +191,7 @@ const profit = computed(() =>
 }
 .planner-result {
   margin: 20px 0;
-  padding: 18px;
+  padding: 14px;
   border: 1px solid var(--accent-line);
   border-radius: 10px;
   background: var(--accent-bg-soft);
@@ -227,7 +247,7 @@ const profit = computed(() =>
   font-size: 12px;
   padding: 5px 0;
 }
-@media (max-width: 560px) {
+@container (max-width: 380px) {
   .planner-controls {
     grid-template-columns: 1fr;
   }
