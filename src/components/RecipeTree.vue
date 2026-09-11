@@ -3,11 +3,14 @@ import { ref } from 'vue'
 import type { CostSource } from '@/utils/cost'
 import { currencyName } from '@/utils/cost'
 import { useDataStore } from '@/stores/data'
+import { useUserStore } from '@/stores/user'
 import { formatInteger, itemName } from '@/utils/format'
 import ItemIcon from './ItemIcon.vue'
 import CurrencyAmount from './CurrencyAmount.vue'
+import PriceInput from './PriceInput.vue'
 defineProps<{ source: CostSource; depth?: number }>()
 const data = useDataStore(),
+  user = useUserStore(),
   expanded = ref(false)
 </script>
 <template>
@@ -24,6 +27,14 @@ const data = useDataStore(),
       </div>
       <CurrencyAmount :value="source.unitCost" />
     </div>
+    <PriceInput
+      v-if="source.vnum"
+      :key="source.vnum"
+      compact
+      :label="`${itemName(data.getItem(source.vnum))} piaci ára / db`"
+      :model-value="user.priceFor(source.vnum).marketPrice"
+      @update:model-value="user.updatePrice(source.vnum, $event)"
+    />
     <details
       v-if="source.kind === 'shop' && (depth ?? 0) < 50"
       @toggle="expanded = ($event.target as HTMLDetailsElement).open"
@@ -73,6 +84,9 @@ const data = useDataStore(),
 }
 .recipe-node summary {
   font-size: 11px;
+}
+.recipe-node > .price-input {
+  margin-bottom: 10px;
 }
 .recipe-node__children {
   border-left: 1px solid var(--accent-line);

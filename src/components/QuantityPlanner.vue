@@ -7,6 +7,7 @@ import { useDataStore } from '@/stores/data'
 import { planAcquisition, type CostSource } from '@/utils/cost'
 import { formatInteger, itemName } from '@/utils/format'
 import CurrencyAmount from './CurrencyAmount.vue'
+import PriceInput from './PriceInput.vue'
 const props = defineProps<{ vnum: number }>()
 const market = useMarketStore(),
   user = useUserStore(),
@@ -114,6 +115,12 @@ const profit = computed(() =>
             <ShoppingBasket :size="14" /><span
               >{{ itemName(data.getItem(id)) }} ×{{ formatInteger(purchase.quantity) }}</span
             ><CurrencyAmount :value="purchase.cost" />
+            <PriceInput
+              compact
+              :label="`${itemName(data.getItem(id))} piaci ára / db`"
+              :model-value="user.priceFor(id).marketPrice"
+              @update:model-value="user.updatePrice(id, $event)"
+            />
           </div>
           <div v-for="(exchange, index) in selected.plan.exchanges" :key="index">
             <ArrowRightLeft :size="14" /><span
@@ -196,7 +203,8 @@ const profit = computed(() =>
   margin: 16px 0 0;
 }
 .plan-lines > div {
-  display: flex;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   padding: 10px 0;
@@ -204,7 +212,10 @@ const profit = computed(() =>
   font-size: 11px;
 }
 .plan-lines > div > span:first-of-type {
-  flex: 1;
+  overflow-wrap: anywhere;
+}
+.plan-lines .price-input {
+  grid-column: 2 / -1;
 }
 .leftover-heading {
   font-size: 13px;
